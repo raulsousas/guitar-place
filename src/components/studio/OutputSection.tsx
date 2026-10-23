@@ -184,9 +184,9 @@ export function LatencySection({ studio }: { studio: StudioApi }) {
         </li>
       </ul>
       <p className="note-small">
-        São estimativas do navegador, não medições: não incluem o buffer da interface de áudio nem o driver.
-        A latência de ida e volta (guitarra até o fone) só se conhece medindo; o procedimento de medição por
-        loopback está em docs/studio.md. Este aplicativo não mede nem promete um valor.
+        São estimativas do navegador, não medições: não incluem o buffer da interface de áudio nem o driver. A latência de ida
+        e volta só se conhece medindo: use o medidor por loopback (cabo da saída da interface para uma entrada), logo abaixo. Este
+        aplicativo não promete um valor; mostra apenas o que o medidor encontrou no seu equipamento.
       </p>
       <div className="info-box" data-testid="studio-direct-monitoring">
         <InfoIcon size={16} />

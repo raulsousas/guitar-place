@@ -132,3 +132,12 @@ Não há registro por caso, por janela, nem de latência, palm mute, distorção
 5. Compare Alto ganho com e sem o portão. Anote se o som ficou mais escuro por causa dos filtros e se a "lixa" nos agudos diminuiu.
 6. Com zumbido de 60 Hz (perto de monitor ou lâmpada), anote se continua audível.
 7. Esta tabela não está preenchida: não há resultado real registrado.
+
+### Caso 24 - Latência de ida e volta por loopback
+
+1. Ligue um cabo da saída de linha da M-Track Duo a uma entrada dela. Volume do fone e do monitor baixos. Desligue o monitoramento direto. Inicie a captura e deixe a saída do Estúdio desligada.
+2. Aba Estúdio, painel lateral, "Medir latência". Esperado: em cerca de 6 s aparece a mediana, o mínimo e o máximo. Anote os três, o navegador, a taxa de amostragem e o buffer do driver.
+3. Repita 3 vezes e depois com outro navegador e outra taxa (44,1 e 48 kHz). Anote se muda.
+4. Desconecte o cabo e meça de novo. Esperado: mensagem de que nenhum clique voltou, nunca um número.
+5. Ligue o monitoramento direto e meça de novo. Esperado: recusa por atraso pequeno demais, ou resultado diferente. Anote.
+6. Com o resultado, compare com o atraso que você percebe no Estúdio. Registre a tabela em docs/studio.md. Esta tabela não está preenchida: não há resultado real registrado.

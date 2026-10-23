@@ -197,6 +197,8 @@ detector **não foram alterados** (o detector recebe sempre o sinal original, se
 - Amplificador e gabinete são **aproximações simples** (saturação matemática e filtros), sem nomes nem modelos de
   equipamentos reais. Licenças e origem em `docs/licenses.md`.
 - **Som, latência e qualidade não foram validados com guitarra real** (caso 21 em `docs/manual-validation.md`).
+- **Latência de ida e volta:** medidor por loopback (cabo da saída da interface para uma entrada) na aba Estúdio. A análise foi validada com
+  atrasos sintéticos conhecidos; **nenhuma medição real do seu equipamento foi registrada ainda** (caso 24). Ver `docs/studio.md`.
 - **Chiado com drive/ganho alto:** portão de ruído (com botão "Medir ruído de fundo") e filtros contra chiado agudo e "lixa". Medido só com
   sinais sintéticos: fecha o ruído entre notas, mas corta o fim das notas mais cedo e soma 5 ms de atraso enquanto ligado. Não validado com guitarra
   real (caso 23). Detalhes e parâmetros em `docs/studio.md`.

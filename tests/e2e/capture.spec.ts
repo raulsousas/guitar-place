@@ -435,3 +435,28 @@ test('Estúdio: portão de ruído liga, mostra o estado real e a medida de ruíd
   expect(result + error).toBe(1);
   expect(errors).toEqual([]);
 });
+test('Estúdio: medidor de loopback recusa com a saída ligada e, sem cabo, termina com mensagem clara e sem número', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+  await page.goto('/');
+  await page.getByTestId('tab-studio').click();
+  await expect(page.getByTestId('loopback-btn')).toBeDisabled();
+
+  await page.getByTestId('tab-tracker').click();
+  await page.getByTestId('start-btn').click();
+  await expect(page.getByTestId('capture-active')).toBeVisible();
+  await page.getByTestId('tab-studio').click();
+
+  // Saída ligada: recusa (evita realimentação).
+  await page.getByTestId('studio-output-switch').click();
+  await page.getByTestId('loopback-btn').click();
+  await expect(page.getByTestId('loopback-error')).toContainText('Desligue a saída');
+
+  // Saída desligada e SEM cabo: o dispositivo falso não recebe os cliques, então nada pode ser medido como latência real.
+  await page.getByTestId('studio-output-switch').click();
+  await page.getByTestId('loopback-btn').click();
+  await expect(page.getByTestId('loopback-btn')).toBeEnabled({ timeout: 15_000 });
+  await expect(page.getByTestId('loopback-result')).toHaveCount(0);
+  await expect(page.getByTestId('loopback-error')).toBeVisible();
+  expect(errors).toEqual([]);
+});

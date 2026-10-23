@@ -109,6 +109,50 @@ melhor opção; o Estúdio serve para ouvir efeitos aceitando o atraso.
 
 Se usar os dois ao mesmo tempo, você ouvirá a guitarra duas vezes (direta e atrasada). Desligue um deles.
 
+### Medidor de latência por loopback (na aba Estúdio, painel lateral)
+
+Mede a latência de ida e volta **real** do seu equipamento: o app toca cliques curtos na saída e mede quando eles voltam pela
+entrada. É o único número de latência do projeto que vem de uma medição (o painel "Latência desta saída" mostra só estimativas do
+navegador).
+
+**Montagem:** cabo da SAÍDA de linha da interface para uma ENTRADA dela (não use a saída de fone se ela for muito alta). Baixe o
+volume do fone e do monitor. **Desligue o monitoramento direto da interface** e a saída do Estúdio. Não toque a guitarra.
+
+**Como funciona (`src/fx/loopback.ts`, `loopback.worklet.ts`, `loopback-runner.ts`):**
+
+1. Ouve a entrada por 0,6 s e guarda o pico do ruído de fundo. Limiar = 6 x esse pico, entre 0,02 e 0,5.
+2. Agenda 10 cliques (rajada de 2 kHz por 4 ms, amplitude 0,2 = -14 dBFS) direto no destino de áudio, **sem passar pelos efeitos nem
+   pelo volume geral**, em intervalos irregulares (média de 0,6 s).
+3. Um AudioWorklet marca a primeira amostra acima do limiar, com o relógio do AudioContext. A latência de cada clique é a diferença
+   entre os dois instantes (precisão de uma amostra, ~0,02 ms a 48 kHz).
+
+| Parâmetro | Valor | Efeito |
+|---|---|---|
+| `clicks` | 10 | mais cliques = mediana mais estável, medida mais longa (cerca de 6 s) |
+| `windowS` | 0,4 s | um clique só conta se voltar em até 400 ms; acima disso a latência não seria de áudio |
+| `holdoffS` | 50 ms | depois de uma detecção, ignora a entrada por este tempo (evita contar o mesmo clique várias vezes) |
+| `minMatched` | 7 | mínimo de cliques que precisam voltar |
+| `maxSpreadMs` | 15 ms | variação máxima (máx - mín) aceita; acima, a medida é descartada como instável |
+| `minPlausibleMs` | 2 ms | mediana menor que isso indica atalho (monitoramento direto/vazamento), não o cabo |
+| `jitterS` | 0 a 0,241 s | atrasos extras e irregulares por clique |
+
+**Por que os intervalos são irregulares:** testei com o dispositivo falso do Chromium, que emite bipes periódicos. Com cliques
+igualmente espaçados, um som periódico já presente na entrada casava com os cliques e dava uma latência constante **falsa** (mediu
+89 ms e 240 ms que não existiam). Com intervalos irregulares, o som periódico passa a variar de clique a clique e a medida falha como
+"instável" em vez de mostrar um número errado. Um teste cobre bipes periódicos de vários períodos.
+
+**O que o resultado significa:** vale só para esta combinação de computador, navegador, driver, taxa de amostragem e buffer. Inclui o
+buffer de saída do navegador, o driver, os conversores, o cabo e o buffer de entrada. **Não inclui** o detector de notas (28 a 65 ms,
+ver `docs/detection.md`) nem os efeitos do Estúdio (cerca de 0,1 ms no Direto e até cerca de 10 ms no Solo, medidos offline). O tempo
+da guitarra até o fone no Estúdio é aproximadamente: latência de ida e volta + atraso dos efeitos ligados.
+
+**Limites:** sinais sintéticos validam a análise (os testes recuperam atrasos conhecidos de 5 a 120 ms com erro menor que 0,7 ms), mas
+**ainda não há medição no seu equipamento**: a tabela abaixo está vazia. Se o cabo for ligado à mesma entrada que a guitarra, o sinal
+da guitarra pode contar como detecção extra. Se houver monitoramento direto ativo, o clique pode vazar sem passar pelo cabo.
+
+| Navegador | Taxa | Buffer da interface | Mediana (ms) | Mín | Máx | Observação |
+|---|---|---|---|---|---|---|
+| (não preenchida: nenhuma medição real registrada) | | | | | | |
 ### Como medir a latência de ida e volta (procedimento manual)
 
 Ainda **não executado**. Anote os resultados na ficha de `docs/manual-validation.md` (caso 21).

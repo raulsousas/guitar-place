@@ -2,6 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { listAudioOutputs, watchDeviceChanges } from '../audio/devices';
 import { thresholdFromNoise, type NoiseMeasure } from '../fx/curves';
 import { StudioEngine } from '../fx/engine';
+import type { LoopbackOutcome } from '../fx/loopback';
+import { runLoopback } from '../fx/loopback-runner';
 import { DEFAULT_STUDIO, STUDIO_PRESETS } from '../fx/presets';
 import type { StudioLevels, StudioParams } from '../fx/types';
 import type { AudioOutputDevice, CaptureGraph } from '../types/audio';
@@ -42,6 +44,11 @@ export interface StudioApi {
    * (só então o sinal chega ao motor). Não altera nenhum parâmetro: quem chama decide aplicar.
    */
   measureNoise(): Promise<NoiseMeasure | { ok: false; reason: 'unavailable' }>;
+  /**
+   * Mede a latência de ida e volta por loopback (cabo da saída da interface para a entrada). Toca cliques direto na saída, sem
+   * passar pelos efeitos. Recusa se a saída do Estúdio estiver LIGADA (fecharia um laço de realimentação).
+   */
+  measureLoopback(): Promise<LoopbackOutcome>;
 }
 
 /** Duração da medida de ruído (ms) e intervalo entre leituras. 2 s dão ~60 quadros de 1024 amostras. */
@@ -216,6 +223,11 @@ export function useStudio(graph: CaptureGraph | null): StudioApi {
           }
         }, MEASURE_STEP_MS);
       }),
+    measureLoopback: () => {
+      if (!graph) return Promise.resolve({ ok: false, reason: 'unavailable' });
+      if (outputEnabled) return Promise.resolve({ ok: false, reason: 'output-on' });
+      return runLoopback(graph.context, graph.source);
+    },
     readLatency: () => {
       if (!graph) return null;
       const c = graph.context;

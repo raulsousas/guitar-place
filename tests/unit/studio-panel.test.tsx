@@ -27,6 +27,7 @@ function api(over: Partial<StudioApi> = {}): StudioApi {
     playTestTone: () => undefined,
     readLevels: () => null,
     readLatency: () => null,
+    measureLoopback: () => Promise.resolve({ ok: false as const, reason: 'unavailable' as const }),
     measureNoise: () => Promise.resolve({ ok: false as const, reason: 'unavailable' as const }),
     ...over,
   };
@@ -243,5 +244,45 @@ describe('Portão de ruído (interface)', () => {
     expect(gate('lead')).toBe(true);
     expect(gate('direct')).toBe(false);
     expect(gate('clean')).toBe(false);
+  });
+});
+describe('Medidor de latência por loopback (interface)', () => {
+  it('traz as instruções do cabo e o botão fica bloqueado sem captura', () => {
+    render(<StudioPanel studio={api()} />);
+    const box = screen.getByTestId('studio-loopback');
+    expect(box).toHaveTextContent(/SAÍDA da interface/);
+    expect(box).toHaveTextContent(/monitoramento direto/);
+    expect(screen.getByTestId('loopback-btn')).toBeDisabled();
+    expect(screen.queryByTestId('loopback-result')).not.toBeInTheDocument();
+    expect(screen.getByTestId('studio-latency')).toHaveTextContent(/medidor por loopback/);
+  });
+
+  it('sucesso: mostra mediana, mínimo, máximo e as ressalvas, sem prometer o valor para outro equipamento', async () => {
+    const measureLoopback = vi.fn().mockResolvedValue({ ok: true, matched: 10, total: 10, minMs: 31.2, medianMs: 32.5, maxMs: 34.1, extraneous: 0 });
+    render(<StudioPanel studio={api({ available: true, measureLoopback })} />);
+    fireEvent.click(screen.getByTestId('loopback-btn'));
+    await waitFor(() => expect(screen.getByTestId('loopback-result')).toBeInTheDocument());
+    const r = screen.getByTestId('loopback-result');
+    expect(r).toHaveTextContent('Mediana: 32.5 ms');
+    expect(r).toHaveTextContent('mínimo 31.2 ms');
+    expect(r).toHaveTextContent('máximo 34.1 ms');
+    expect(r).toHaveTextContent('10 de 10 cliques');
+    expect(r).toHaveTextContent(/Não inclui o detector/);
+    expect(r).toHaveTextContent(/não vale para outra combinação/);
+  });
+
+  it.each([
+    ['output-on', /Desligue a saída do Estúdio/],
+    ['no-signal', /Nenhum clique voltou/],
+    ['noisy', /Pare de tocar/],
+    ['too-fast', /atalho/],
+    ['unstable', /variaram mais de/],
+  ])('falha %s: mensagem clara, nenhum número inventado', async (reason, text) => {
+    const measureLoopback = vi.fn().mockResolvedValue({ ok: false, reason, matched: 0, total: 10, latenciesMs: [] });
+    render(<StudioPanel studio={api({ available: true, measureLoopback })} />);
+    fireEvent.click(screen.getByTestId('loopback-btn'));
+    await waitFor(() => expect(screen.getByTestId('loopback-error')).toBeInTheDocument());
+    expect(screen.getByTestId('loopback-error')).toHaveTextContent(text);
+    expect(screen.queryByTestId('loopback-result')).not.toBeInTheDocument();
   });
 });

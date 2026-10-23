@@ -10,6 +10,7 @@ import type { DecodedAudio } from '../../audio/decode-file';
 import { Knob } from './Knob';
 import { NoiseMeasureControl } from './NoiseMeasureControl';
 import { LatencySection, OutputSection } from './OutputSection';
+import { LoopbackMeasure } from './LoopbackMeasure';
 
 type SubTab = 'effects' | 'amp' | 'cabinet' | 'mixer';
 const SUB_TABS: { id: SubTab; label: string }[] = [
@@ -324,6 +325,7 @@ export function StudioPanel({ studio, decode }: { studio: StudioApi; decode?: (f
         <Panel title="Saída" testId="studio-side-panel">
           <OutputSection studio={studio} />
           <LatencySection studio={studio} />
+          <LoopbackMeasure studio={studio} />
         </Panel>
       </aside>
     </div>

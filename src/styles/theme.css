@@ -1,0 +1,71 @@
+:root {
+  --bg: #050d1c;
+  --bg-2: #07142a;
+  --panel: #0b1b35;
+  --panel-2: #0f2442;
+  --panel-3: #132c50;
+  --border: #1b3358;
+  --border-soft: #14284a;
+  --text: #e8eefb;
+  --text-dim: #9fb0cf;
+  --text-faint: #6c7fa3;
+  --green: #22e07a;
+  --green-soft: rgba(34, 224, 122, 0.14);
+  --blue: #2f8cff;
+  --blue-soft: rgba(47, 140, 255, 0.16);
+  --amber: #f2c230;
+  --red: #ff5468;
+  --red-soft: rgba(255, 84, 104, 0.12);
+  --radius: 14px;
+  --radius-sm: 9px;
+  --font: 'Inter Variable', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --mono: 'Cascadia Mono', Consolas, ui-monospace, monospace;
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: radial-gradient(1200px 600px at 70% -10%, #0c2144 0%, var(--bg) 60%) fixed;
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 14px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+select,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}

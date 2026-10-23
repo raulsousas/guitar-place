@@ -1,0 +1,680 @@
+{
+  "generatedAt": "2026-10-22T01:51:48.050Z",
+  "node": "v24.19.0",
+  "sampleRate": 48000,
+  "note": "Sinais sintéticos. Não valida reconhecimento com guitarra real.",
+  "accuracy": [
+    {
+      "windowSize": 2048,
+      "scenario": "limpo",
+      "range": "E2-E6",
+      "notes": 49,
+      "correct": 49,
+      "octaveErrors": 0,
+      "otherWrong": 0,
+      "missed": 0,
+      "extraEvents": 0,
+      "medianAbsCents": 0.61
+    },
+    {
+      "windowSize": 2048,
+      "scenario": "limpo",
+      "range": "E2-D3",
+      "notes": 8,
+      "correct": 8,
+      "octaveErrors": 0,
+      "otherWrong": 0,
+      "missed": 0,
+      "extraEvents": 0,
+      "medianAbsCents": 0.35
+    },
+    {
+      "windowSize": 2048,
+      "scenario": "ruido-20dB",
+      "range": "E2-E6",
+      "notes": 49,
+      "correct": 49,
+      "octaveErrors": 0,
+      "otherWrong": 0,
+      "missed": 0,
+      "extraEvents": 0,
+      "medianAbsCents": 0.63
+    },
+    {
+      "windowSize": 2048,
+      "scenario": "ruido-20dB",
+      "range": "E2-D3",
+      "notes": 8,
+      "correct": 8,
+      "octaveErrors": 0,
+      "otherWrong": 0,
+      "missed": 0,
+      "extraEvents": 0,
+      "medianAbsCents": 0.44
+    },
+    {
+      "windowSize": 2048,
+      "scenario": "ruido-10dB",
+      "range": "E2-E6",
+      "notes": 49,
+      "correct": 49,
+      "octaveErrors": 0,
+      "otherWrong": 0,
+      "missed": 0,
+      "extraEvents": 0,
+      "medianAbsCents": 0.72
+    },
+    {
+      "windowSize": 2048,
+      "scenario": "ruido-10dB",
+      "range": "E2-D3",
+      "notes": 8,
+      "correct": 8,
+      "octaveErrors": 0,
+      "otherWrong": 0,
+      "missed": 0,
+      "extraEvents": 0,
+      "medianAbsCents": 0.29
+    },
+    {
+      "windowSize": 2048,
+      "scenario": "ruido-0dB",
+      "range": "E2-E6",
+      "notes": 49,
+      "correct": 49,
+      "octaveErrors": 0,
+      "otherWrong": 0,
+      "missed": 0,
+      "extraEvents": 0,
+      "medianAbsCents": 1.64
+    },
+    {
+      "windowSize": 2048,
+      "scenario": "ruido-0dB",
+      "range": "E2-D3",
+      "notes": 8,
+      "correct": 8,
+      "octaveErrors": 0,
+      "otherWrong": 0,
+      "missed": 0,
+      "extraEvents": 0,
+      "medianAbsCents": 2.18
+    },
+    {
+      "windowSize": 2048,
+      "scenario": "fundamental-fraca",
+      "range": "E2-E6",
+      "notes": 49,
+      "correct": 49,
+      "octaveErrors": 0,
+      "otherWrong": 0,
+      "missed": 0,
+      "extraEvents": 0,
+      "medianAbsCents": 0.19
+    },
+    {
+      "windowSize": 2048,
+      "scenario": "fundamental-fraca",
+      "range": "E2-D3",
+      "notes": 8,
+      "correct": 8,
+      "octaveErrors": 0,
+      "otherWrong": 0,
+      "missed": 0,
+      "extraEvents": 0,
+      "medianAbsCents": 0.02
+    },
+    {
+      "windowSize": 2048,
+      "scenario": "distorcido",
+      "range": "E2-E6",
+      "notes": 49,
+      "correct": 49,
+      "octaveErrors": 0,
+      "otherWrong": 0,
+      "missed": 0,
+      "extraEvents": 0,
+      "medianAbsCents": 0.11
+    },
+    {
+      "windowSize": 2048,
+      "scenario": "distorcido",
+      "range": "E2-D3",
+      "notes": 8,
+      "correct": 8,
+      "octaveErrors": 0,
+      "otherWrong": 0,
+      "missed": 0,
+      "extraEvents": 0,
+      "medianAbsCents": 0.01
+    },
+    {
+      "windowSize": 4096,
+      "scenario": "limpo",
+      "range": "E2-E6",
+      "notes": 49,
+      "correct": 49,
+      "octaveErrors": 0,
+      "otherWrong": 0,
+      "missed": 0,
+      "extraEvents": 0,
+      "medianAbsCents": 1.03
+    },
+    {
+      "windowSize": 4096,
+      "scenario": "limpo",
+      "range": "E2-D3",
+      "notes": 8,
+      "correct": 8,
+      "octaveErrors": 0,
+      "otherWrong": 0,
+      "missed": 0,
+      "extraEvents": 0,
+      "medianAbsCents": 3.5
+    },
+    {
+      "windowSize": 4096,
+      "scenario": "ruido-20dB",
+      "range": "E2-E6",
+      "notes": 49,
+      "correct": 49,
+      "octaveErrors": 0,
+      "otherWrong": 0,
+      "missed": 0,
+      "extraEvents": 0,
+      "medianAbsCents": 0.95
+    },
+    {
+      "windowSize": 4096,
+      "scenario": "ruido-20dB",
+      "range": "E2-D3",
+      "notes": 8,
+      "correct": 8,
+      "octaveErrors": 0,
+      "otherWrong": 0,
+      "missed": 0,
+      "extraEvents": 0,
+      "medianAbsCents": 3.35
+    },
+    {
+      "windowSize": 4096,
+      "scenario": "ruido-10dB",
+      "range": "E2-E6",
+      "notes": 49,
+      "correct": 49,
+      "octaveErrors": 0,
+      "otherWrong": 0,
+      "missed": 0,
+      "extraEvents": 0,
+      "medianAbsCents": 1.08
+    },
+    {
+      "windowSize": 4096,
+      "scenario": "ruido-10dB",
+      "range": "E2-D3",
+      "notes": 8,
+      "correct": 8,
+      "octaveErrors": 0,
+      "otherWrong": 0,
+      "missed": 0,
+      "extraEvents": 0,
+      "medianAbsCents": 3.4
+    },
+    {
+      "windowSize": 4096,
+      "scenario": "ruido-0dB",
+      "range": "E2-E6",
+      "notes": 49,
+      "correct": 49,
+      "octaveErrors": 0,
+      "otherWrong": 0,
+      "missed": 0,
+      "extraEvents": 0,
+      "medianAbsCents": 1.32
+    },
+    {
+      "windowSize": 4096,
+      "scenario": "ruido-0dB",
+      "range": "E2-D3",
+      "notes": 8,
+      "correct": 8,
+      "octaveErrors": 0,
+      "otherWrong": 0,
+      "missed": 0,
+      "extraEvents": 0,
+      "medianAbsCents": 3.14
+    },
+    {
+      "windowSize": 4096,
+      "scenario": "fundamental-fraca",
+      "range": "E2-E6",
+      "notes": 49,
+      "correct": 49,
+      "octaveErrors": 0,
+      "otherWrong": 0,
+      "missed": 0,
+      "extraEvents": 0,
+      "medianAbsCents": 0.39
+    },
+    {
+      "windowSize": 4096,
+      "scenario": "fundamental-fraca",
+      "range": "E2-D3",
+      "notes": 8,
+      "correct": 8,
+      "octaveErrors": 0,
+      "otherWrong": 0,
+      "missed": 0,
+      "extraEvents": 0,
+      "medianAbsCents": 1.32
+    },
+    {
+      "windowSize": 4096,
+      "scenario": "distorcido",
+      "range": "E2-E6",
+      "notes": 49,
+      "correct": 49,
+      "octaveErrors": 0,
+      "otherWrong": 0,
+      "missed": 0,
+      "extraEvents": 0,
+      "medianAbsCents": 0.2
+    },
+    {
+      "windowSize": 4096,
+      "scenario": "distorcido",
+      "range": "E2-D3",
+      "notes": 8,
+      "correct": 8,
+      "octaveErrors": 0,
+      "otherWrong": 0,
+      "missed": 0,
+      "extraEvents": 0,
+      "medianAbsCents": 0.76
+    },
+    {
+      "windowSize": 8192,
+      "scenario": "limpo",
+      "range": "E2-E6",
+      "notes": 49,
+      "correct": 49,
+      "octaveErrors": 0,
+      "otherWrong": 0,
+      "missed": 0,
+      "extraEvents": 0,
+      "medianAbsCents": 1.03
+    },
+    {
+      "windowSize": 8192,
+      "scenario": "limpo",
+      "range": "E2-D3",
+      "notes": 8,
+      "correct": 8,
+      "octaveErrors": 0,
+      "otherWrong": 0,
+      "missed": 0,
+      "extraEvents": 0,
+      "medianAbsCents": 3.5
+    },
+    {
+      "windowSize": 8192,
+      "scenario": "ruido-20dB",
+      "range": "E2-E6",
+      "notes": 49,
+      "correct": 49,
+      "octaveErrors": 0,
+      "otherWrong": 0,
+      "missed": 0,
+      "extraEvents": 0,
+      "medianAbsCents": 0.95
+    },
+    {
+      "windowSize": 8192,
+      "scenario": "ruido-20dB",
+      "range": "E2-D3",
+      "notes": 8,
+      "correct": 8,
+      "octaveErrors": 0,
+      "otherWrong": 0,
+      "missed": 0,
+      "extraEvents": 0,
+      "medianAbsCents": 3.34
+    },
+    {
+      "windowSize": 8192,
+      "scenario": "ruido-10dB",
+      "range": "E2-E6",
+      "notes": 49,
+      "correct": 49,
+      "octaveErrors": 0,
+      "otherWrong": 0,
+      "missed": 0,
+      "extraEvents": 0,
+      "medianAbsCents": 0.92
+    },
+    {
+      "windowSize": 8192,
+      "scenario": "ruido-10dB",
+      "range": "E2-D3",
+      "notes": 8,
+      "correct": 8,
+      "octaveErrors": 0,
+      "otherWrong": 0,
+      "missed": 0,
+      "extraEvents": 0,
+      "medianAbsCents": 3.05
+    },
+    {
+      "windowSize": 8192,
+      "scenario": "ruido-0dB",
+      "range": "E2-E6",
+      "notes": 49,
+      "correct": 49,
+      "octaveErrors": 0,
+      "otherWrong": 0,
+      "missed": 0,
+      "extraEvents": 0,
+      "medianAbsCents": 1.26
+    },
+    {
+      "windowSize": 8192,
+      "scenario": "ruido-0dB",
+      "range": "E2-D3",
+      "notes": 8,
+      "correct": 8,
+      "octaveErrors": 0,
+      "otherWrong": 0,
+      "missed": 0,
+      "extraEvents": 0,
+      "medianAbsCents": 2.24
+    },
+    {
+      "windowSize": 8192,
+      "scenario": "fundamental-fraca",
+      "range": "E2-E6",
+      "notes": 49,
+      "correct": 49,
+      "octaveErrors": 0,
+      "otherWrong": 0,
+      "missed": 0,
+      "extraEvents": 0,
+      "medianAbsCents": 0.39
+    },
+    {
+      "windowSize": 8192,
+      "scenario": "fundamental-fraca",
+      "range": "E2-D3",
+      "notes": 8,
+      "correct": 8,
+      "octaveErrors": 0,
+      "otherWrong": 0,
+      "missed": 0,
+      "extraEvents": 0,
+      "medianAbsCents": 1.32
+    },
+    {
+      "windowSize": 8192,
+      "scenario": "distorcido",
+      "range": "E2-E6",
+      "notes": 49,
+      "correct": 49,
+      "octaveErrors": 0,
+      "otherWrong": 0,
+      "missed": 0,
+      "extraEvents": 0,
+      "medianAbsCents": 0.2
+    },
+    {
+      "windowSize": 8192,
+      "scenario": "distorcido",
+      "range": "E2-D3",
+      "notes": 8,
+      "correct": 8,
+      "octaveErrors": 0,
+      "otherWrong": 0,
+      "missed": 0,
+      "extraEvents": 0,
+      "medianAbsCents": 0.76
+    }
+  ],
+  "latency": [
+    {
+      "windowSize": 2048,
+      "note": "E2",
+      "structuralWindowMs": 42.7,
+      "trueOnsetToEventMs": 62.5
+    },
+    {
+      "windowSize": 2048,
+      "note": "A2",
+      "structuralWindowMs": 42.7,
+      "trueOnsetToEventMs": 53.9
+    },
+    {
+      "windowSize": 2048,
+      "note": "E3",
+      "structuralWindowMs": 42.7,
+      "trueOnsetToEventMs": 45.3
+    },
+    {
+      "windowSize": 2048,
+      "note": "E4",
+      "structuralWindowMs": 42.7,
+      "trueOnsetToEventMs": 34.7
+    },
+    {
+      "windowSize": 2048,
+      "note": "E5",
+      "structuralWindowMs": 42.7,
+      "trueOnsetToEventMs": 30.5
+    },
+    {
+      "windowSize": 2048,
+      "note": "E6",
+      "structuralWindowMs": 42.7,
+      "trueOnsetToEventMs": 28.4
+    },
+    {
+      "windowSize": 4096,
+      "note": "E2",
+      "structuralWindowMs": 85.3,
+      "trueOnsetToEventMs": 64.6
+    },
+    {
+      "windowSize": 4096,
+      "note": "A2",
+      "structuralWindowMs": 85.3,
+      "trueOnsetToEventMs": 53.9
+    },
+    {
+      "windowSize": 4096,
+      "note": "E3",
+      "structuralWindowMs": 85.3,
+      "trueOnsetToEventMs": 45.3
+    },
+    {
+      "windowSize": 4096,
+      "note": "E4",
+      "structuralWindowMs": 85.3,
+      "trueOnsetToEventMs": 34.7
+    },
+    {
+      "windowSize": 4096,
+      "note": "E5",
+      "structuralWindowMs": 85.3,
+      "trueOnsetToEventMs": 30.5
+    },
+    {
+      "windowSize": 4096,
+      "note": "E6",
+      "structuralWindowMs": 85.3,
+      "trueOnsetToEventMs": 28.4
+    },
+    {
+      "windowSize": 8192,
+      "note": "E2",
+      "structuralWindowMs": 170.7,
+      "trueOnsetToEventMs": 64.6
+    },
+    {
+      "windowSize": 8192,
+      "note": "A2",
+      "structuralWindowMs": 170.7,
+      "trueOnsetToEventMs": 53.9
+    },
+    {
+      "windowSize": 8192,
+      "note": "E3",
+      "structuralWindowMs": 170.7,
+      "trueOnsetToEventMs": 45.3
+    },
+    {
+      "windowSize": 8192,
+      "note": "E4",
+      "structuralWindowMs": 170.7,
+      "trueOnsetToEventMs": 34.7
+    },
+    {
+      "windowSize": 8192,
+      "note": "E5",
+      "structuralWindowMs": 170.7,
+      "trueOnsetToEventMs": 30.5
+    },
+    {
+      "windowSize": 8192,
+      "note": "E6",
+      "structuralWindowMs": 170.7,
+      "trueOnsetToEventMs": 28.4
+    }
+  ],
+  "rapid": [
+    {
+      "windowSize": 2048,
+      "noteMs": 80,
+      "expected": 8,
+      "detectedInOrder": 8,
+      "totalEvents": 8,
+      "extraEvents": 0
+    },
+    {
+      "windowSize": 2048,
+      "noteMs": 120,
+      "expected": 8,
+      "detectedInOrder": 8,
+      "totalEvents": 8,
+      "extraEvents": 0
+    },
+    {
+      "windowSize": 2048,
+      "noteMs": 160,
+      "expected": 8,
+      "detectedInOrder": 8,
+      "totalEvents": 8,
+      "extraEvents": 0
+    },
+    {
+      "windowSize": 2048,
+      "noteMs": 250,
+      "expected": 8,
+      "detectedInOrder": 8,
+      "totalEvents": 8,
+      "extraEvents": 0
+    },
+    {
+      "windowSize": 4096,
+      "noteMs": 80,
+      "expected": 8,
+      "detectedInOrder": 8,
+      "totalEvents": 8,
+      "extraEvents": 0
+    },
+    {
+      "windowSize": 4096,
+      "noteMs": 120,
+      "expected": 8,
+      "detectedInOrder": 8,
+      "totalEvents": 8,
+      "extraEvents": 0
+    },
+    {
+      "windowSize": 4096,
+      "noteMs": 160,
+      "expected": 8,
+      "detectedInOrder": 8,
+      "totalEvents": 8,
+      "extraEvents": 0
+    },
+    {
+      "windowSize": 4096,
+      "noteMs": 250,
+      "expected": 8,
+      "detectedInOrder": 8,
+      "totalEvents": 8,
+      "extraEvents": 0
+    },
+    {
+      "windowSize": 8192,
+      "noteMs": 80,
+      "expected": 8,
+      "detectedInOrder": 1,
+      "totalEvents": 1,
+      "extraEvents": 0
+    },
+    {
+      "windowSize": 8192,
+      "noteMs": 120,
+      "expected": 8,
+      "detectedInOrder": 8,
+      "totalEvents": 8,
+      "extraEvents": 0
+    },
+    {
+      "windowSize": 8192,
+      "noteMs": 160,
+      "expected": 8,
+      "detectedInOrder": 8,
+      "totalEvents": 8,
+      "extraEvents": 0
+    },
+    {
+      "windowSize": 8192,
+      "noteMs": 250,
+      "expected": 8,
+      "detectedInOrder": 8,
+      "totalEvents": 8,
+      "extraEvents": 0
+    }
+  ],
+  "cpu": [
+    {
+      "windowSize": 2048,
+      "audioSeconds": 20,
+      "wallMs": 524,
+      "realtimeFactor": 0.0262,
+      "frames": 1872,
+      "frameMeanMs": 0.271,
+      "frameP99Ms": 0.432,
+      "frameMaxMs": 0.68
+    },
+    {
+      "windowSize": 4096,
+      "audioSeconds": 20,
+      "wallMs": 896,
+      "realtimeFactor": 0.0448,
+      "frames": 1868,
+      "frameMeanMs": 0.471,
+      "frameP99Ms": 0.793,
+      "frameMaxMs": 0.937
+    },
+    {
+      "windowSize": 8192,
+      "audioSeconds": 20,
+      "wallMs": 1946,
+      "realtimeFactor": 0.0973,
+      "frames": 1860,
+      "frameMeanMs": 1.04,
+      "frameP99Ms": 1.689,
+      "frameMaxMs": 3.721
+    }
+  ]
+}

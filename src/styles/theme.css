@@ -1,25 +1,91 @@
+/*
+ * Tokens do design "Rock Studio" (docs/design-system.md). Fonte única de cores, tipografia, espaçamento, bordas e sombras.
+ * Os nomes antigos (--bg, --panel, --blue...) continuam existindo como ALIAS dos tokens novos, para o CSS anterior herdar a paleta
+ * sem ser reescrito. Âmbar = seleção e ação principal; verde = áudio ativo; vermelho = clipping ou erro real; azul = informação.
+ */
 :root {
-  --bg: #050d1c;
-  --bg-2: #07142a;
-  --panel: #0b1b35;
-  --panel-2: #0f2442;
-  --panel-3: #132c50;
-  --border: #1b3358;
-  --border-soft: #14284a;
-  --text: #e8eefb;
-  --text-dim: #9fb0cf;
-  --text-faint: #6c7fa3;
-  --green: #22e07a;
-  --green-soft: rgba(34, 224, 122, 0.14);
-  --blue: #2f8cff;
-  --blue-soft: rgba(47, 140, 255, 0.16);
-  --amber: #f2c230;
-  --red: #ff5468;
-  --red-soft: rgba(255, 84, 104, 0.12);
-  --radius: 14px;
-  --radius-sm: 9px;
+  /* Superfícies e madeira */
+  --bg-void: #100c09;
+  --bg-studio: #19120e;
+  --wood-dark: #241710;
+  --wood-walnut: #39251a;
+  --wood-highlight: #654329;
+  --surface-metal: #292622;
+  --surface-raised: #332b24;
+  --surface-control: #171715;
+
+  /* Destaques */
+  --accent-amber: #d99038;
+  --accent-copper: #b96b32;
+  --accent-gold: #e9b86c;
+  --accent-green: #39c878;
+  --accent-blue: #4a9fe8;
+  --accent-purple: #9b6de3;
+  --accent-red: #e45d50;
+
+  /* Texto e linhas */
+  --text-primary: #f2e8d9;
+  --text-secondary: #c1b19d;
+  --text-muted: #948575;
+  --border-subtle: #49362a;
+  --border-active: #c78338;
+  --led-off: #51483d;
+
+  /* Cor de identificação de cada bloco do Estúdio (detalhe, nunca fundo grande) */
+  --gear-gate: #6b6862;
+  --gear-drive: #3f8a4f;
+  --gear-eq: #3d6f9a;
+  --gear-amp: #d9b36a;
+  --gear-cabinet: #6e4a2e;
+  --gear-delay: #6a46a8;
+  --gear-reverb: #7e58c4;
+
+  /* Espaçamento (múltiplos de 4 px) */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+
+  /* Forma e elevação */
+  --radius: 10px;
+  --radius-sm: 6px;
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-2: 0 2px 6px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(233, 184, 108, 0.06);
+  --led-glow: 0 0 6px;
+  --t-fast: 140ms;
+
+  /* Tipografia */
   --font: 'Inter Variable', 'Segoe UI', system-ui, -apple-system, sans-serif;
-  --mono: 'Cascadia Mono', Consolas, ui-monospace, monospace;
+  --font-brand: 'Bebas Neue', Impact, 'Arial Narrow', sans-serif;
+  --mono: 'IBM Plex Mono', 'Cascadia Mono', Consolas, ui-monospace, monospace;
+
+  /* Texturas (só CSS, sem imagens): veios horizontais de madeira e escovado do metal */
+  --tex-wood:
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0) 0, rgba(0, 0, 0, 0) 5px, rgba(0, 0, 0, 0.1) 5px, rgba(0, 0, 0, 0.1) 6px),
+    repeating-linear-gradient(0deg, rgba(101, 67, 41, 0.1) 0, rgba(101, 67, 41, 0.1) 2px, rgba(0, 0, 0, 0) 2px, rgba(0, 0, 0, 0) 13px),
+    linear-gradient(180deg, #2c1c13 0%, #241710 100%);
+  --tex-metal: repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.025) 0, rgba(255, 255, 255, 0.025) 1px, rgba(0, 0, 0, 0) 1px, rgba(0, 0, 0, 0) 3px), linear-gradient(180deg, #2f2b26, #25221e);
+
+  /* ALIAS dos nomes antigos */
+  --bg: var(--bg-void);
+  --bg-2: var(--bg-studio);
+  --panel: var(--wood-dark);
+  --panel-2: var(--surface-control);
+  --panel-3: var(--surface-raised);
+  --border: var(--border-subtle);
+  --border-soft: #3a2b21;
+  --text: var(--text-primary);
+  --text-dim: var(--text-secondary);
+  --text-faint: var(--text-muted);
+  --green: var(--accent-green);
+  --green-soft: rgba(57, 200, 120, 0.14);
+  --blue: var(--accent-blue);
+  --blue-soft: rgba(74, 159, 232, 0.14);
+  --amber: var(--accent-amber);
+  --red: var(--accent-red);
+  --red-soft: rgba(228, 93, 80, 0.12);
   color-scheme: dark;
 }
 
@@ -35,8 +101,8 @@ body,
 
 body {
   margin: 0;
-  background: radial-gradient(1200px 600px at 70% -10%, #0c2144 0%, var(--bg) 60%) fixed;
-  color: var(--text);
+  background: var(--bg-void);
+  color: var(--text-primary);
   font-family: var(--font);
   font-size: 14px;
   line-height: 1.45;
@@ -59,7 +125,7 @@ button:disabled {
 }
 
 :focus-visible {
-  outline: 2px solid var(--blue);
+  outline: 2px solid var(--accent-gold);
   outline-offset: 2px;
 }
 

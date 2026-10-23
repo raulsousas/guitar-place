@@ -29,10 +29,12 @@ export async function runLoopback(ctx: AudioContext, source: AudioNode): Promise
   const hits: LoopbackHit[] = [];
   let ambient = 0;
   let listeningAmbient = true;
+  let clickPhasePeak = 0;
   node.port.onmessage = (ev: MessageEvent<WorkletMessage>) => {
     const m = ev.data;
     if (m.type === 'peak') {
       if (listeningAmbient) ambient = Math.max(ambient, m.peak);
+      else clickPhasePeak = Math.max(clickPhasePeak, m.peak);
     } else {
       hits.push({ time: m.time, peak: m.peak });
     }
@@ -42,7 +44,8 @@ export async function runLoopback(ctx: AudioContext, source: AudioNode): Promise
   try {
     await sleep(L.ambientS * 1000);
     listeningAmbient = false;
-    node.port.postMessage({ type: 'arm', threshold: thresholdFromAmbient(ambient), holdoffS: L.holdoffS });
+    const threshold = thresholdFromAmbient(ambient);
+    node.port.postMessage({ type: 'arm', threshold, holdoffS: L.holdoffS });
 
     const click = clickBuffer(ctx.sampleRate);
     const buf = ctx.createBuffer(1, click.length, ctx.sampleRate);
@@ -60,7 +63,10 @@ export async function runLoopback(ctx: AudioContext, source: AudioNode): Promise
     }
     await sleep((t0 - ctx.currentTime + offsets[offsets.length - 1]! + L.windowS + 0.2) * 1000);
     node.port.postMessage({ type: 'disarm' });
-    return analyzeHits(clickTimes, hits);
+    const result = analyzeHits(clickTimes, hits);
+    if (result.ok) return result;
+    const toDb = (v: number) => (v > 1e-6 ? 20 * Math.log10(v) : -120);
+    return { ...result, peakDb: toDb(clickPhasePeak), thresholdDb: toDb(threshold) };
   } finally {
     try {
       source.disconnect(node);

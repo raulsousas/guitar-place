@@ -191,7 +191,7 @@ describe('Aba Estúdio no App', () => {
 describe('Portão de ruído (interface)', () => {
   it('bloco aparece na cadeia e em Efeitos, desligado por padrão, com aviso de atraso e do limiar', () => {
     render(<StudioPanel studio={api()} />);
-    expect(screen.getByTestId('chain-gate')).toHaveAttribute('aria-pressed', 'false');
+    expect(screen.getByTestId('chain-gate')).toHaveAttribute('aria-checked', 'false');
     expect(screen.getByTestId('gate-switch')).toHaveAttribute('aria-checked', 'false');
     expect(screen.getByTestId('gate-threshold')).toBeInTheDocument();
     expect(screen.getByTestId('studio-pane-effects')).toHaveTextContent(/cerca de 5 ms de atraso/);

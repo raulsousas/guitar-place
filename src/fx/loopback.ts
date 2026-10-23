@@ -56,7 +56,16 @@ export type LoopbackFailure = 'no-signal' | 'noisy' | 'too-few' | 'too-fast' | '
 
 export type LoopbackResult =
   | { ok: true; matched: number; total: number; minMs: number; medianMs: number; maxMs: number; extraneous: number }
-  | { ok: false; reason: LoopbackFailure; matched: number; total: number; latenciesMs: number[] };
+  | {
+      ok: false;
+      reason: LoopbackFailure;
+      matched: number;
+      total: number;
+      latenciesMs: number[];
+      /** Diagnóstico (só preenchido pelo executor real): maior pico da entrada durante os cliques e limiar usado, em dBFS. */
+      peakDb?: number;
+      thresholdDb?: number;
+    };
 
 export type LoopbackOutcome = LoopbackResult | { ok: false; reason: 'unavailable' | 'output-on' | 'worklet-failed' };
 

@@ -11,6 +11,7 @@ import { Knob } from './Knob';
 import { NoiseMeasureControl } from './NoiseMeasureControl';
 import { LatencySection, OutputSection } from './OutputSection';
 import { LoopbackMeasure } from './LoopbackMeasure';
+import { SignalChain, type BenchTab, type BlockId } from './SignalChain';
 
 type SubTab = 'effects' | 'amp' | 'cabinet' | 'mixer';
 const SUB_TABS: { id: SubTab; label: string }[] = [
@@ -20,16 +21,6 @@ const SUB_TABS: { id: SubTab; label: string }[] = [
   { id: 'mixer', label: 'Mixer' },
 ];
 
-type BlockId = 'gate' | 'drive' | 'eq' | 'amp' | 'cabinet' | 'delay' | 'reverb';
-const CHAIN: { id: BlockId; label: string }[] = [
-  { id: 'gate', label: 'Portão de ruído' },
-  { id: 'drive', label: 'Pedal de drive' },
-  { id: 'eq', label: 'Equalizador' },
-  { id: 'amp', label: 'Amplificador' },
-  { id: 'cabinet', label: 'Gabinete' },
-  { id: 'delay', label: 'Delay' },
-  { id: 'reverb', label: 'Reverb' },
-];
 
 const pct = (v: number) => `${Math.round(v * 100)}%`;
 const dbFmt = (v: number) => `${v > 0 ? '+' : ''}${v.toFixed(0)} dB`;
@@ -86,6 +77,7 @@ function BlockHeader({
 
 export function StudioPanel({ studio, decode }: { studio: StudioApi; decode?: (file: File) => Promise<DecodedAudio> }) {
   const [tab, setTab] = useState<SubTab>('effects');
+  const [selected, setSelected] = useState<BlockId | null>(null);
   const { params, update } = studio;
 
   const set = <K extends BlockId>(block: K, patch: Partial<StudioParams[K]>) =>
@@ -94,6 +86,15 @@ export function StudioPanel({ studio, decode }: { studio: StudioApi; decode?: (f
   return (
     <div className="studio" data-testid="studio-view">
       <div className="studio-main">
+        <SignalChain
+          params={params}
+          selected={selected}
+          onToggle={(id) => set(id, { enabled: !params[id].enabled } as never)}
+          onSelect={(id, benchTab: BenchTab) => {
+            setSelected(id);
+            setTab(benchTab);
+          }}
+        />
         <Panel title="Estúdio: efeitos e amplificador" icon={<SlidersIcon size={22} />} testId="studio-panel">
           <div className="studio-privacy" data-testid="studio-privacy">
             <ShieldIcon size={16} />
@@ -128,22 +129,6 @@ export function StudioPanel({ studio, decode }: { studio: StudioApi; decode?: (f
             Trocar a predefinição não altera o volume geral nem o canal de entrada.
           </p>
 
-          <ol className="chain" aria-label="Cadeia de efeitos" data-testid="studio-chain">
-            <li className="chain-node fixed">Entrada</li>
-            {CHAIN.map((b) => (
-              <li key={b.id} className={params[b.id].enabled ? 'chain-node on' : 'chain-node'}>
-                <button
-                  type="button"
-                  aria-pressed={params[b.id].enabled}
-                  onClick={() => set(b.id, { enabled: !params[b.id].enabled } as never)}
-                  data-testid={`chain-${b.id}`}
-                >
-                  {b.label}
-                </button>
-              </li>
-            ))}
-            <li className="chain-node fixed">Saída</li>
-          </ol>
 
           <div className="view-tabs sub" role="tablist" aria-label="Seções do estúdio">
             {SUB_TABS.map((t) => (

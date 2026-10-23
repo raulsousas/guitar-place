@@ -1,9 +1,21 @@
 import type { CaptureStatus } from '../types/audio';
-import { GearIcon, GuitarIcon } from './icons';
+import { GearIcon, GuitarIcon, NoteIcon, SlidersIcon, TuningIcon } from './icons';
+
+export type View = 'tracker' | 'tuner' | 'studio';
+
+const VIEWS: { id: View; label: string; icon: typeof NoteIcon }[] = [
+  { id: 'tracker', label: 'Rastreador', icon: GuitarIcon },
+  { id: 'tuner', label: 'Afinador', icon: TuningIcon },
+  { id: 'studio', label: 'Estúdio', icon: SlidersIcon },
+];
 
 interface HeaderProps {
   status: CaptureStatus;
   deviceLabel: string | null;
+  /** Taxa real do AudioContext (Hz), ou null sem captura. Nada é inventado: sem captura, nada é mostrado. */
+  sampleRate: number | null;
+  view: View;
+  onViewChange: (view: View) => void;
 }
 
 function statusText(status: CaptureStatus, deviceLabel: string | null): { text: string; cls: string } {
@@ -19,7 +31,7 @@ function statusText(status: CaptureStatus, deviceLabel: string | null): { text: 
   }
 }
 
-export function Header({ status, deviceLabel }: HeaderProps) {
+export function Header({ status, deviceLabel, sampleRate, view, onViewChange }: HeaderProps) {
   const s = statusText(status, deviceLabel);
   return (
     <header className="header">
@@ -28,10 +40,31 @@ export function Header({ status, deviceLabel }: HeaderProps) {
         <h1>Guitar Tracker</h1>
       </div>
       <p className="subtitle">Rastreador de notas da guitarra em tempo real</p>
+
+      <div className="view-tabs main-nav" role="tablist" aria-label="Modo">
+        {VIEWS.map((v) => (
+          <button
+            key={v.id}
+            type="button"
+            role="tab"
+            id={`tab-${v.id}`}
+            aria-selected={view === v.id}
+            aria-controls={`view-${v.id}`}
+            className={view === v.id ? 'view-tab active' : 'view-tab'}
+            onClick={() => onViewChange(v.id)}
+            data-testid={`tab-${v.id}`}
+          >
+            <v.icon size={16} />
+            <span>{v.label}</span>
+          </button>
+        ))}
+      </div>
+
       <span className="header-spacer" />
       <div className="conn-status" role="status" data-testid="connection-status">
         <span className={`dot ${s.cls}`} />
         {s.text}
+        {status === 'active' && sampleRate ? <span className="conn-rate">{(sampleRate / 1000).toFixed(1)} kHz</span> : null}
       </div>
       <button
         type="button"

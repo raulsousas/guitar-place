@@ -6,7 +6,7 @@ import { inferenceForLiveNote, normalizeRegion } from './inference/position';
 import { STANDARD_TUNING } from './music/tuning';
 import { AudioPanel } from './components/AudioPanel';
 import { DEFAULT_FRET_COUNT, FRET_COUNT_OPTIONS, FretboardPanel } from './components/FretboardPanel';
-import { Header } from './components/Header';
+import { Header, type View } from './components/Header';
 import { HistoryPanel } from './components/HistoryPanel';
 import { SuggestionsPanel, TipsPanel } from './components/Panels';
 import { TablaturePanel } from './components/TablaturePanel';
@@ -15,13 +15,6 @@ import { StudioPanel } from './components/studio/StudioPanel';
 import { TunerPanel } from './components/TunerPanel';
 import { TuningPanel } from './components/TuningPanel';
 
-type View = 'tracker' | 'tuner' | 'studio';
-
-const VIEWS: { id: View; label: string }[] = [
-  { id: 'tracker', label: 'Rastreador' },
-  { id: 'tuner', label: 'Afinador' },
-  { id: 'studio', label: 'Estúdio' },
-];
 
 export function App() {
   const [requestedFretCount, setFretCount] = useState<number>(DEFAULT_FRET_COUNT);
@@ -33,6 +26,8 @@ export function App() {
   // O Estúdio vive no App (não na aba) para a saída e os ajustes sobreviverem à troca de aba.
   const studio = useStudio(audio.graph);
   const [view, setView] = useState<View>('tracker');
+  // Só tem efeito em telas estreitas (ver .sidebar-toggle no CSS): nas largas o painel lateral fica sempre visível.
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const liveMidi = audio.status === 'active' ? (audio.live.note?.midi ?? null) : null;
   const inference = useMemo(
     () => inferenceForLiveNote(liveMidi, audio.lastInference, STANDARD_TUNING, fretCount, region),
@@ -40,30 +35,30 @@ export function App() {
   );
   return (
     <div className="app">
-      <Header status={audio.status} deviceLabel={audio.info?.deviceLabel ?? null} />
-      <div className="layout">
-        <aside className="sidebar">
+      <Header
+        status={audio.status}
+        deviceLabel={audio.info?.deviceLabel ?? null}
+        sampleRate={audio.info?.sampleRate ?? null}
+        view={view}
+        onViewChange={setView}
+      />
+      <div className={sidebarOpen ? 'layout' : 'layout sidebar-collapsed'}>
+        <button
+          type="button"
+          className="sidebar-toggle"
+          aria-expanded={sidebarOpen}
+          aria-controls="app-sidebar"
+          onClick={() => setSidebarOpen((o) => !o)}
+          data-testid="sidebar-toggle"
+        >
+          {sidebarOpen ? 'Recolher áudio e afinação' : 'Mostrar áudio e afinação'}
+        </button>
+        <aside className="sidebar" id="app-sidebar">
           <AudioPanel audio={audio} />
           <TuningPanel />
         </aside>
         <main className="main">
-          <div className="view-tabs" role="tablist" aria-label="Modo">
-            {VIEWS.map((v) => (
-              <button
-                key={v.id}
-                type="button"
-                role="tab"
-                id={`tab-${v.id}`}
-                aria-selected={view === v.id}
-                aria-controls={`view-${v.id}`}
-                className={view === v.id ? 'view-tab active' : 'view-tab'}
-                onClick={() => setView(v.id)}
-                data-testid={`tab-${v.id}`}
-              >
-                {v.label}
-              </button>
-            ))}
-          </div>
+
           {view === 'tracker' ? (
             <div id="view-tracker" role="tabpanel" aria-labelledby="tab-tracker" className="view">
               <StatusCards audio={audio} inference={inference} />

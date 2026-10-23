@@ -7,7 +7,7 @@ const FAILURES = {
   unavailable: 'Inicie a captura para medir.',
   'output-on': 'Desligue a saída do Estúdio ("Ouvir a guitarra") antes de medir: com ela ligada, o clique que volta pela entrada seria reenviado à saída.',
   'worklet-failed': 'Não foi possível carregar o medidor neste navegador.',
-  'no-signal': 'Nenhum clique voltou. Confira o cabo (saída da interface para uma entrada), a entrada escolhida, o botão de monitoramento e o volume da saída.',
+  'no-signal': 'Nenhum clique voltou. Confira o cabo (saída da interface para uma entrada), a entrada escolhida, o botão de monitoramento e o volume da saída. O clique sai pelo Dispositivo de saída do Estúdio: escolha a saída da própria interface, não o fone ou os alto-falantes do computador.',
   noisy: 'A entrada tinha sinal, mas não coincidiu com os cliques (ruído ou guitarra tocando). Pare de tocar, solte as cordas e meça de novo.',
   'too-few': `Menos de ${LOOPBACK.minMatched} dos ${LOOPBACK.clicks} cliques voltaram. Aumente o volume da saída da interface ou confira o cabo e meça de novo.`,
   'too-fast': 'O atraso medido é pequeno demais para ser real: o clique provavelmente passou por um atalho (monitoramento direto da interface ou som vazando) em vez de pelo cabo. Desative o monitoramento direto e meça de novo.',
@@ -69,6 +69,9 @@ export function LoopbackMeasure({ studio }: { studio: StudioApi }) {
       {o && !o.ok ? (
         <p className="meter-warn" role="alert" data-testid="loopback-error">
           <AlertIcon size={13} /> {FAILURES[o.reason]}
+          {'peakDb' in o && o.peakDb !== undefined && o.thresholdDb !== undefined
+            ? ` Maior nível visto na entrada durante os cliques: ${o.peakDb.toFixed(0)} dBFS (limiar de detecção: ${o.thresholdDb.toFixed(0)} dBFS).`
+            : ''}
           {'latenciesMs' in o && o.latenciesMs.length > 0 ? ` (voltaram ${o.matched} de ${o.total}; tempos: ${o.latenciesMs.map((v) => v.toFixed(1)).join(', ')} ms)` : ''}
         </p>
       ) : null}

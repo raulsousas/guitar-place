@@ -408,3 +408,30 @@ test('Estúdio: ajuste automático por arquivo local aplica, informa os limites,
   await expect(page.getByTestId('auto-error')).toBeVisible({ timeout: 15_000 });
   expect(errors).toEqual([]);
 });
+test('Estúdio: portão de ruído liga, mostra o estado real e a medida de ruído responde com resultado ou mensagem clara', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+  await page.goto('/');
+  await page.getByTestId('tab-studio').click();
+  await expect(page.getByTestId('gate-switch')).toHaveAttribute('aria-checked', 'false');
+  // Sem a saída ligada a medida é recusada com instrução, sem alterar nada.
+  await page.getByTestId('noise-measure-btn').click();
+  await expect(page.getByTestId('noise-measure-error')).toContainText('Ligue a saída');
+
+  await page.getByTestId('tab-tracker').click();
+  await page.getByTestId('start-btn').click();
+  await expect(page.getByTestId('capture-active')).toBeVisible();
+  await page.getByTestId('tab-studio').click();
+  await page.getByTestId('studio-output-switch').click();
+  await page.getByTestId('gate-switch').click();
+  await expect(page.getByTestId('gate-switch')).toHaveAttribute('aria-checked', 'true');
+  await expect(page.getByTestId('studio-gate-state')).toBeVisible();
+
+  // O dispositivo falso emite bipes: a medida deve terminar com limiar ou com recusa explicada (nunca ficar pendurada).
+  await page.getByTestId('noise-measure-btn').click();
+  await expect(page.getByTestId('noise-measure-btn')).toBeEnabled({ timeout: 8_000 });
+  const result = await page.getByTestId('noise-measure-result').count();
+  const error = await page.getByTestId('noise-measure-error').count();
+  expect(result + error).toBe(1);
+  expect(errors).toEqual([]);
+});

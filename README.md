@@ -197,6 +197,9 @@ detector **não foram alterados** (o detector recebe sempre o sinal original, se
 - Amplificador e gabinete são **aproximações simples** (saturação matemática e filtros), sem nomes nem modelos de
   equipamentos reais. Licenças e origem em `docs/licenses.md`.
 - **Som, latência e qualidade não foram validados com guitarra real** (caso 21 em `docs/manual-validation.md`).
+- **Chiado com drive/ganho alto:** portão de ruído (com botão "Medir ruído de fundo") e filtros contra chiado agudo e "lixa". Medido só com
+  sinais sintéticos: fecha o ruído entre notas, mas corta o fim das notas mais cedo e soma 5 ms de atraso enquanto ligado. Não validado com guitarra
+  real (caso 23). Detalhes e parâmetros em `docs/studio.md`.
 - **Ajuste automático por música:** escolha um arquivo de áudio local e o Estúdio se configura (amp, gabinete, drive, reverb).
   É uma heurística não calibrada, mede a mistura inteira (não só a guitarra) e não funciona com links do YouTube.
   Nunca altera saída, volume geral, canal nem ganho de entrada, e tem botão de desfazer. Ver `docs/studio.md` e caso 22.

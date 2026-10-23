@@ -8,6 +8,7 @@ import { ShieldIcon, SlidersIcon } from '../icons';
 import { AutoConfigSection } from './AutoConfigSection';
 import type { DecodedAudio } from '../../audio/decode-file';
 import { Knob } from './Knob';
+import { NoiseMeasureControl } from './NoiseMeasureControl';
 import { LatencySection, OutputSection } from './OutputSection';
 
 type SubTab = 'effects' | 'amp' | 'cabinet' | 'mixer';
@@ -18,8 +19,9 @@ const SUB_TABS: { id: SubTab; label: string }[] = [
   { id: 'mixer', label: 'Mixer' },
 ];
 
-type BlockId = 'drive' | 'eq' | 'amp' | 'cabinet' | 'delay' | 'reverb';
+type BlockId = 'gate' | 'drive' | 'eq' | 'amp' | 'cabinet' | 'delay' | 'reverb';
 const CHAIN: { id: BlockId; label: string }[] = [
+  { id: 'gate', label: 'Portão de ruído' },
   { id: 'drive', label: 'Pedal de drive' },
   { id: 'eq', label: 'Equalizador' },
   { id: 'amp', label: 'Amplificador' },
@@ -160,6 +162,23 @@ export function StudioPanel({ studio, decode }: { studio: StudioApi; decode?: (f
 
           {tab === 'effects' ? (
             <div className="blocks" role="tabpanel" data-testid="studio-pane-effects">
+              <section className="block">
+                <BlockHeader
+                  label="Portão de ruído"
+                  enabled={params.gate.enabled}
+                  onToggle={() => set('gate', { enabled: !params.gate.enabled })}
+                  testId="gate"
+                  note="Fecha o som entre as notas: tira o chiado que o drive e o ganho alto aumentam. Fica antes do drive."
+                />
+                <div className="knobs">
+                  <Knob label="Limiar" testId="gate-threshold" value={params.gate.thresholdDb} min={-80} max={-30} step={1} format={dbFmt} onChange={(v) => set('gate', { thresholdDb: v })} />
+                </div>
+                <NoiseMeasureControl studio={studio} />
+                <p className="note-small">
+                  Limiar alto demais corta o fim das notas e notas fracas; baixo demais deixa o chiado passar. Adiciona cerca de 5 ms de atraso enquanto estiver ligado.
+                </p>
+              </section>
+
               <section className="block">
                 <BlockHeader
                   label="Pedal de drive"

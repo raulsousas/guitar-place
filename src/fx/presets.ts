@@ -8,6 +8,7 @@ import type { StudioParams } from './types';
 export const DEFAULT_STUDIO: StudioParams = {
   inputChannel: 'sum',
   inputTrimDb: 0,
+  gate: { enabled: false, thresholdDb: -58 },
   drive: { enabled: false, drive: 0.45, tone: 0.6, level: 0.7 },
   eq: { enabled: false, lowDb: 0, midDb: 0, highDb: 0 },
   amp: { enabled: false, voicing: 'crunch', gain: 0.5, bass: 0.5, mid: 0.5, treble: 0.5, level: 0.6 },
@@ -41,10 +42,12 @@ export const STUDIO_PRESETS: StudioPreset[] = [
     p.reverb = { enabled: true, decayS: 1.6, mix: 0.2 };
   }),
   make('crunch', 'Crunch', 'Distorção média de amplificador com gabinete 4x12.', (p) => {
+    p.gate = { ...p.gate, enabled: true };
     p.amp = { ...p.amp, enabled: true, voicing: 'crunch', gain: 0.55, level: 0.6 };
     p.cabinet = { enabled: true, kind: '4x12' };
   }),
   make('lead', 'Solo', 'Pedal na frente de um amplificador saturado, com delay e reverb.', (p) => {
+    p.gate = { ...p.gate, enabled: true };
     p.drive = { enabled: true, drive: 0.4, tone: 0.65, level: 0.65 };
     p.amp = { ...p.amp, enabled: true, voicing: 'high', gain: 0.5, level: 0.5 };
     p.cabinet = { enabled: true, kind: '4x12' };

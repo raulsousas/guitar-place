@@ -244,6 +244,7 @@ function api(over: Partial<StudioApi> = {}): StudioApi {
     playTestTone: () => undefined,
     readLevels: () => null,
     readLatency: () => null,
+    measureNoise: () => Promise.resolve({ ok: false as const, reason: 'unavailable' as const }),
     ...over,
   };
 }

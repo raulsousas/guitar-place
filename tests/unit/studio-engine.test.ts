@@ -156,10 +156,10 @@ describe('StudioEngine: efeitos', () => {
       p.amp = { enabled: true, voicing: 'crunch', gain, bass: 0.5, mid: 0.5, treble: 0.5, level: 0.8 };
       return p;
     };
-    const lo = await render(mk(0.1));
-    const hi = await render(mk(0.9));
-    const crest = (d: Float32Array) => peak(d, 24000) / rms(d, 24000);
-    expect(crest(hi)).toBeLessThan(crest(lo));
+    // Compressão = quanto o nível de saída cresce (dB) quando a entrada dobra (+6 dB): menor crescimento = mais saturado.
+    // (O fator de crista não serve aqui: o bloqueio de DC tira o deslocamento da curva assimétrica e muda o pico de um lado.)
+    const growth = async (gain: number) => db(rms(await render(mk(gain), { amp: 0.3 }), 24000) / rms(await render(mk(gain), { amp: 0.15 }), 24000));
+    expect(await growth(0.9)).toBeLessThan((await growth(0.1)) - 1);
   });
   it('EQ: +12 dB nos graves aumenta o nível de 80 Hz; os agudos de 80 Hz não mudam muito', async () => {
     const flat = await render(allOff(), { freq: 80 });

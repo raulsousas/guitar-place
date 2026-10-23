@@ -1,5 +1,13 @@
 import {
+  AMP_DC_HZ,
+  AMP_FILTERS,
   AMP_VOICINGS,
+  DRIVE_PRE_LP_HZ,
+  GATE_ENV_HZ,
+  GATE_LOOKAHEAD_S,
+  absCurve,
+  gateCurve,
+  gateScale,
   MAX_FEEDBACK,
   ampLevelGain,
   ampPreGain,
@@ -19,7 +27,7 @@ import type { AmpVoicing, CabinetKind, StudioLevels, StudioParams } from './type
  * Motor do Estúdio: grafo Web Audio que processa a guitarra e a envia para a saída escolhida.
  *
  * Cadeia (mono até o reverb):
- *   fonte -> [canal] -> trim -> pedal (drive) -> EQ -> amplificador -> gabinete -> delay -> reverb
+ *   fonte -> [canal] -> trim -> portão de ruído -> pedal (drive) -> EQ -> amplificador -> gabinete -> delay -> reverb
  *         -> volume -> limitador suave (máx. 0,98) -> porta de saída -> destino
  *
  * Regras de segurança (ver docs/studio.md):
@@ -63,6 +71,15 @@ export class StudioEngine {
   private readonly trim: GainNode;
   private readonly inAnalyser: AnalyserNode;
   // blocos
+  private readonly noiseGate: Stage;
+  private readonly gateEnvScale: GainNode;
+  private readonly gateCtl: AnalyserNode;
+  private readonly gateCtlBuf: Float32Array<ArrayBuffer>;
+  private readonly driveLp: BiquadFilterNode;
+  private readonly driveDc: BiquadFilterNode;
+  private readonly ampPreLp: BiquadFilterNode;
+  private readonly ampDc: BiquadFilterNode;
+  private readonly ampLp2: BiquadFilterNode;
   private readonly drive: Stage;
   private readonly drivePre: GainNode;
   private readonly driveHp: BiquadFilterNode;
@@ -129,13 +146,39 @@ export class StudioEngine {
     this.mono.connect(this.trim);
     this.trim.connect(this.inAnalyser);
 
+    // Portão de ruído (ver GATE_* em curves.ts). O ramo lateral mede a envoltória do sinal (valor absoluto -> passa-baixas)
+    // e comanda o ganho do caminho do áudio. O áudio passa por um atraso curto (antecipação) para o portão abrir ANTES do ataque.
+    const gateAbs = ctx.createWaveShaper();
+    gateAbs.curve = absCurve();
+    const gateEnv = this.biquad('lowpass', GATE_ENV_HZ, 0.707);
+    this.gateEnvScale = ctx.createGain();
+    this.gateEnvScale.gain.value = gateScale(-58);
+    const gateShaper = ctx.createWaveShaper();
+    gateShaper.curve = gateCurve();
+    const gateVca = ctx.createGain();
+    gateVca.gain.value = 0; // o ganho vem só do ramo lateral
+    const gateDelay = ctx.createDelay(0.05);
+    gateDelay.delayTime.value = GATE_LOOKAHEAD_S;
+    this.trim.connect(gateAbs);
+    gateAbs.connect(gateEnv);
+    gateEnv.connect(this.gateEnvScale);
+    this.gateEnvScale.connect(gateShaper);
+    gateShaper.connect(gateVca.gain);
+    this.gateCtl = ctx.createAnalyser();
+    this.gateCtl.fftSize = 32;
+    this.gateCtlBuf = new Float32Array(this.gateCtl.fftSize);
+    gateShaper.connect(this.gateCtl);
+    this.noiseGate = this.stage(this.trim, [gateDelay, gateVca]);
+
     // Pedal de drive: passa-altas -> ganho -> saturação (4x de sobreamostragem contra aliasing) -> tom -> volume.
     this.driveHp = this.biquad('highpass', 120, 0.707);
     this.drivePre = ctx.createGain();
     this.driveShaper = this.shaper(saturationCurve(2.2, 0.05));
+    this.driveLp = this.biquad('lowpass', DRIVE_PRE_LP_HZ, 0.707); // tira o chiado agudo ANTES de a saturação multiplicá-lo
+    this.driveDc = this.biquad('highpass', AMP_DC_HZ, 0.707); // remove o nível DC criado pela curva assimétrica
     this.driveTone = this.biquad('lowpass', 4000, 0.707);
     this.driveLevel = ctx.createGain();
-    this.drive = this.stage(this.trim, [this.driveHp, this.drivePre, this.driveShaper, this.driveTone, this.driveLevel]);
+    this.drive = this.stage(this.noiseGate.output, [this.driveHp, this.driveLp, this.drivePre, this.driveShaper, this.driveDc, this.driveTone, this.driveLevel]);
 
     // EQ de três bandas. Desligado = ganhos em 0 dB (transparente) por crossfade.
     this.eqLow = this.biquad('lowshelf', 100, 0.707);
@@ -164,9 +207,12 @@ export class StudioEngine {
     this.ampMid = this.biquad('peaking', 700, 0.8);
     this.ampHigh = this.biquad('highshelf', 3200, 0.707);
     this.ampLp = this.biquad('lowpass', 7500, 0.707);
+    this.ampLp2 = this.biquad('lowpass', 7500, 0.707); // em série com o anterior: 24 dB/oitava contra a 'lixa' dos harmônicos agudos
+    this.ampPreLp = this.biquad('lowpass', 7000, 0.707); // antes da saturação: não deixa o chiado agudo virar fritura
+    this.ampDc = this.biquad('highpass', AMP_DC_HZ, 0.707);
     this.ampLevel = ctx.createGain();
     this.amp = this.stage(this.eq.output, [
-      this.ampHp, this.ampPre, { in: voiceIn, out: voiceOut }, this.ampLow, this.ampMid, this.ampHigh, this.ampLp, this.ampLevel,
+      this.ampHp, this.ampPreLp, this.ampPre, { in: voiceIn, out: voiceOut }, this.ampDc, this.ampLow, this.ampMid, this.ampHigh, this.ampLp, this.ampLp2, this.ampLevel,
     ]);
 
     // Gabinete: passa-altas, corpo, presença e dois passa-baixas em série (declive ~24 dB/oitava).
@@ -283,6 +329,10 @@ export class StudioEngine {
     this.smooth(this.g2.gain, mode === 'ch1' ? 0 : mode === 'sum' ? 0.5 : 0);
     this.smooth(this.trim.gain, dbToGain(clamp(p.inputTrimDb, -20, 20)));
 
+    const g = p.gate;
+    this.smooth(this.gateEnvScale.gain, gateScale(g.thresholdDb));
+    this.crossfade(this.noiseGate, g.enabled);
+
     const d = p.drive;
     this.smooth(this.drivePre.gain, driveToGain(d.drive));
     this.smooth(this.driveTone.frequency, driveToneHz(d.tone));
@@ -299,6 +349,11 @@ export class StudioEngine {
     for (const id of Object.keys(this.ampVoices) as AmpVoicing[]) {
       this.smooth(this.ampVoices[id].gain.gain, id === a.voicing ? 1 : 0);
     }
+    const f = AMP_FILTERS[a.voicing];
+    this.smooth(this.ampHp.frequency, f.hpHz);
+    this.smooth(this.ampPreLp.frequency, f.preLpHz);
+    this.smooth(this.ampLp.frequency, f.postLpHz);
+    this.smooth(this.ampLp2.frequency, f.postLpHz);
     this.smooth(this.ampPre.gain, ampPreGain(a.voicing, a.gain));
     this.smooth(this.ampLow.gain, toneToDb(a.bass));
     this.smooth(this.ampMid.gain, toneToDb(a.mid));
@@ -398,7 +453,14 @@ export class StudioEngine {
     this.inAnalyser.getFloatTimeDomainData(this.inBuf);
     this.outAnalyser.getFloatTimeDomainData(this.outBuf);
     let ip = 0;
-    for (const v of this.inBuf) ip = Math.max(ip, Math.abs(v));
+    let isq = 0;
+    for (const v of this.inBuf) {
+      ip = Math.max(ip, Math.abs(v));
+      isq += v * v;
+    }
+    this.gateCtl.getFloatTimeDomainData(this.gateCtlBuf);
+    let gsum = 0;
+    for (const v of this.gateCtlBuf) gsum += v;
     let op = 0;
     let sq = 0;
     for (const v of this.outBuf) {
@@ -408,6 +470,8 @@ export class StudioEngine {
     const db = (x: number) => (x > 0 ? 20 * Math.log10(x) : -Infinity);
     return {
       inputPeakDb: db(ip),
+      inputRmsDb: db(Math.sqrt(isq / this.inBuf.length)),
+      gateOpen: gsum / this.gateCtlBuf.length,
       outputPeakDb: db(op),
       outputRmsDb: db(Math.sqrt(sq / this.outBuf.length)),
       inputClip: ip >= 0.99,

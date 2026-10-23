@@ -122,6 +122,64 @@ Ainda **não executado**. Anote os resultados na ficha de `docs/manual-validatio
    máximo).
 5. Para medir só o caminho guitarra -> fone, repita com a guitarra no lugar do cabo e compare com o monitoramento direto.
 
+## Chiado em ganho alto: portão de ruído e filtros
+
+**Problema:** com drive ou voz "Alto ganho" o chiado da interface e dos captadores é multiplicado junto com a nota. Entre as notas
+só resta esse ruído, amplificado em dezenas de dB, e os harmônicos agudos da saturação soam como lixa.
+
+**Três medidas, todas com nós nativos (sem AudioWorklet), em `src/fx/curves.ts` e `src/fx/engine.ts`:**
+
+1. **Portão de ruído** (antes do drive). Mede a envoltória do sinal e fecha o caminho quando a guitarra está quieta.
+2. **Passa-baixas antes da saturação** (no drive e no amplificador). Tira o chiado agudo que a guitarra quase não tem, antes de a
+   saturação transformá-lo em fritura.
+3. **Dois passa-baixas depois da saturação** (24 dB/oitava) e um passa-altas de 10 Hz que remove o nível DC da curva assimétrica.
+
+### Portão de ruído
+
+| Constante / controle | Valor | Efeito |
+|---|---|---|
+| Limiar (controle, -80 a -30 dBFS) | padrão -58 dB | nível da envoltória em que o portão fica 100% aberto. Alto demais: corta fim de nota e notas fracas. Baixo demais: deixa o chiado passar |
+| `GATE_RANGE_DB` | 10 dB | o portão fecha por completo 10 dB abaixo do limiar; no meio a transição é suave (smoothstep) |
+| `GATE_ENV_HZ` | 25 Hz | passa-baixas da envoltória (~6 ms). Menor: menos ondulação em notas graves, abre mais devagar |
+| `GATE_LOOKAHEAD_S` | 5 ms | o áudio é atrasado em relação à envoltória para o portão abrir antes do ataque. **Soma 5 ms de latência enquanto o portão está ligado** |
+
+A envoltória de um seno de pico A vale ~0,64 A (média do valor absoluto), cerca de 4 dB abaixo do pico: o limiar é da envoltória,
+não do pico.
+
+**Medir ruído de fundo (botão no bloco do portão):** com a saída ligada e todas as cordas abafadas com a mão, o Estúdio lê o nível de
+entrada por 2 s e define `limiar = ruído (p95 do RMS) - 1 dB + 12 dB`. A medida é recusada (e nada muda) se não chegou sinal, se havia
+som alto demais (> -35 dBFS), se o nível variou mais de 6 dB (uma corda soou) ou se houve poucas leituras. Os 12 dB de folga e os
+limites estão em `NOISE_MEASURE`. O valor não foi validado com sua guitarra: confira de ouvido e ajuste o limiar.
+
+As predefinições Crunch e Solo ligam o portão com o limiar padrão. Limpo e Direto não.
+
+### Filtros por voz (`AMP_FILTERS`)
+
+| Voz | Passa-altas antes (Hz) | Passa-baixas antes (Hz) | Passa-baixas depois, x2 (Hz) |
+|---|---|---|---|
+| Limpo | 80 | 8000 | 8000 |
+| Crunch | 100 | 7000 | 6800 |
+| Alto ganho | 120 | 6000 | 5800 |
+
+Quanto mais ganho, mais filtragem. Efeito colateral: som um pouco mais escuro. Pedal de drive: passa-baixas de 7 kHz antes da saturação.
+Valores escolhidos à mão; **não foram ouvidos com guitarra real**.
+
+### O que foi medido (e o que não foi)
+
+Medido no motor real (renderização offline, `tests/unit/studio-noise.test.ts`), com ruído de fundo de -60 dBFS RMS, uma nota de
+-20 dBFS de pico, drive 0,7 + amplificador "Alto ganho" ganho 0,8 + gabinete 4x12 e limiar -48 dB:
+
+* Sem portão, o ruído entre as notas sai em cerca de -10 dBFS (ruído de -60 dB virou barulho). Com portão, o portão fecha por completo
+  (ganho 0) e o ruído entre as notas some. O teste exige redução de pelo menos 30 dB.
+* Ataque e corpo da nota ficam dentro de 1,5 dB do resultado sem portão (medido: cerca de 0,4 dB no ataque).
+* **Custo medido:** o portão fecha o final da nota antes. Na cauda do sinal de teste (1,6 a 2,0 s) o nível ficou 12 dB abaixo do
+  resultado sem portão. Isso é o comportamento esperado de um portão: é o preço de silenciar o chiado. Para sustentar mais, baixe o limiar.
+
+**Não medido:** o som com guitarra real, captadores, cabos, ruído de 60 Hz, palm mute, notas fracas, e se o limiar padrão serve para a sua
+interface. Sinais sintéticos validam a mecânica do portão, não o gosto. Ver caso 23 em `docs/manual-validation.md`.
+
+**Limites conhecidos:** zumbido tonal (60 Hz) que fica constante acima do limiar não é removido por um portão; use cabo/aterramento e
+afaste-se de monitores. Ruído que existe junto com a nota (durante o sustento) continua presente: o portão só age nas pausas.
 ## Ajuste automático por música
 
 Na aba Estúdio, o usuário escolhe um arquivo de áudio **local** (MP3, WAV, OGG, M4A ou FLAC). O app mede o som do trecho

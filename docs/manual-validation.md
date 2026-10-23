@@ -122,3 +122,13 @@ Não há registro por caso, por janela, nem de latência, palm mute, distorção
 4. Clique em "Desfazer ajuste automático". Esperado: os valores voltam ao que estavam.
 5. Teste um arquivo curto (menos de 5 s), um quase mudo e um que não é áudio. Esperado: mensagem clara, sem travar.
 6. Esta tabela não está preenchida: não há resultado real registrado.
+
+### Caso 23 - Estúdio: chiado com drive e ganho alto
+
+1. Fones de ouvido, volume baixo. Inicie a captura, abra Estúdio, ligue a saída e use a predefinição Solo (ou drive + Alto ganho).
+2. Sem tocar, deixe o portão desligado e anote se há chiado. Ligue o portão, abafe as cordas com a mão e clique em "Medir ruído de fundo". Anote o ruído medido e o limiar sugerido.
+3. Toque notas curtas, longas e fracas. Esperado: sem chiado entre as notas. Anote se o início da nota foi cortado, se o final foi cortado cedo (cauda) e a partir de que limiar isso acontece.
+4. Teste palm mute e notas muito fracas (harmônicos): anote se o portão corta. Ajuste o limiar e anote o valor que funcionou.
+5. Compare Alto ganho com e sem o portão. Anote se o som ficou mais escuro por causa dos filtros e se a "lixa" nos agudos diminuiu.
+6. Com zumbido de 60 Hz (perto de monitor ou lâmpada), anote se continua audível.
+7. Esta tabela não está preenchida: não há resultado real registrado.

@@ -54,6 +54,11 @@ export function StudioMeters({ studio }: { studio: StudioApi }) {
     <div className="studio-meters" data-testid="studio-meters">
       <Bar label="Entrada" db={levels.inputPeakDb} hot={levels.inputClip} testId="studio-meter-in" />
       <Bar label="Saída" db={levels.outputPeakDb} hot={levels.outputClip} testId="studio-meter-out" />
+      {studio.params.gate.enabled ? (
+        <p className="note-small" data-testid="studio-gate-state" data-open={levels.gateOpen.toFixed(2)}>
+          Portão de ruído: {levels.gateOpen > 0.9 ? 'aberto' : levels.gateOpen < 0.05 ? 'fechado' : 'abrindo/fechando'}
+        </p>
+      ) : null}
       {levels.inputClip ? (
         <p className="meter-warn" role="status" data-testid="studio-clip-in">
           <AlertIcon size={13} /> Entrada saturada: reduza o ganho da interface ou o ganho de entrada.

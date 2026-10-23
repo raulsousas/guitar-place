@@ -11,6 +11,11 @@ export interface StageToggle {
   enabled: boolean;
 }
 
+export interface GateParams extends StageToggle {
+  /** -80..-30 dBFS: nivel da envoltoria do sinal em que o portao fica 100% aberto (fecha por completo 10 dB abaixo). */
+  thresholdDb: number;
+}
+
 export interface DriveParams extends StageToggle {
   /** 0..1: ganho antes da saturação (1x a ~32x, ou 0 a 30 dB). */
   drive: number;
@@ -64,6 +69,7 @@ export interface StudioParams {
   inputChannel: ChannelMode;
   /** -20..+20 dB antes de todos os efeitos. */
   inputTrimDb: number;
+  gate: GateParams;
   drive: DriveParams;
   eq: EqParams;
   amp: AmpParams;
@@ -76,6 +82,10 @@ export interface StudioParams {
 
 export interface StudioLevels {
   inputPeakDb: number;
+  /** RMS do sinal de entrada depois do ganho de entrada (dBFS). Usado para medir o ruído de fundo. */
+  inputRmsDb: number;
+  /** 0 (portão fechado) a 1 (aberto): ganho do portão de ruído no último bloco. Sem sinal na entrada vale 0. */
+  gateOpen: number;
   outputPeakDb: number;
   outputRmsDb: number;
   inputClip: boolean;

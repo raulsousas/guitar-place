@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { StudioPanel } from '../../src/components/studio/StudioPanel';
 import { StudioMeters } from '../../src/components/studio/OutputSection';
 import type { StudioApi } from '../../src/hooks/useStudio';
@@ -27,6 +27,7 @@ function api(over: Partial<StudioApi> = {}): StudioApi {
     playTestTone: () => undefined,
     readLevels: () => null,
     readLatency: () => null,
+    measureNoise: () => Promise.resolve({ ok: false as const, reason: 'unavailable' as const }),
     ...over,
   };
 }
@@ -184,5 +185,63 @@ describe('Aba Estúdio no App', () => {
     expect(screen.getByTestId('studio-output-switch')).toHaveAttribute('aria-checked', 'false');
     fireEvent.click(screen.getByTestId('tab-tracker'));
     expect(screen.getByTestId('fretboard-panel')).toBeInTheDocument();
+  });
+});
+describe('Portão de ruído (interface)', () => {
+  it('bloco aparece na cadeia e em Efeitos, desligado por padrão, com aviso de atraso e do limiar', () => {
+    render(<StudioPanel studio={api()} />);
+    expect(screen.getByTestId('chain-gate')).toHaveAttribute('aria-pressed', 'false');
+    expect(screen.getByTestId('gate-switch')).toHaveAttribute('aria-checked', 'false');
+    expect(screen.getByTestId('gate-threshold')).toBeInTheDocument();
+    expect(screen.getByTestId('studio-pane-effects')).toHaveTextContent(/cerca de 5 ms de atraso/);
+    expect(screen.getByTestId('studio-pane-effects')).toHaveTextContent(/Limiar alto demais corta/);
+  });
+
+  it('ligar o portão altera só o bloco do portão', () => {
+    const update = vi.fn();
+    render(<StudioPanel studio={api({ update })} />);
+    fireEvent.click(screen.getByTestId('gate-switch'));
+    const next = (update.mock.calls[0]![0] as (p: typeof DEFAULT_STUDIO) => typeof DEFAULT_STUDIO)(structuredClone(DEFAULT_STUDIO));
+    expect(next.gate.enabled).toBe(true);
+    expect(next.gate.thresholdDb).toBe(DEFAULT_STUDIO.gate.thresholdDb);
+    expect(next.drive).toEqual(DEFAULT_STUDIO.drive);
+    expect(next.masterDb).toBe(DEFAULT_STUDIO.masterDb);
+  });
+
+  it('medir ruído: sucesso define limiar e liga o portão, mostrando o que foi medido', async () => {
+    const update = vi.fn();
+    const measureNoise = vi.fn().mockResolvedValue({ ok: true, noiseDb: -62, thresholdDb: -51 });
+    render(<StudioPanel studio={api({ update, measureNoise, available: true, outputEnabled: true })} />);
+    fireEvent.click(screen.getByTestId('noise-measure-btn'));
+    await waitFor(() => expect(screen.getByTestId('noise-measure-result')).toBeInTheDocument());
+    expect(screen.getByTestId('noise-measure-result')).toHaveTextContent('-62 dBFS');
+    expect(screen.getByTestId('noise-measure-result')).toHaveTextContent('-51 dB');
+    const next = (update.mock.calls[0]![0] as (p: typeof DEFAULT_STUDIO) => typeof DEFAULT_STUDIO)(structuredClone(DEFAULT_STUDIO));
+    expect(next.gate).toEqual({ enabled: true, thresholdDb: -51 });
+    expect(next.masterDb).toBe(DEFAULT_STUDIO.masterDb);
+  });
+
+  it.each([
+    ['unavailable', /Ligue a saída/],
+    ['too-loud', /Abafe as cordas/],
+    ['unstable', /variou durante a medida/],
+    ['no-signal', /Nenhum sinal chegou/],
+  ])('medir ruído: falha %s mostra mensagem clara e não altera parâmetros', async (reason, text) => {
+    const update = vi.fn();
+    const measureNoise = vi.fn().mockResolvedValue({ ok: false, reason });
+    render(<StudioPanel studio={api({ update, measureNoise })} />);
+    fireEvent.click(screen.getByTestId('noise-measure-btn'));
+    await waitFor(() => expect(screen.getByTestId('noise-measure-error')).toBeInTheDocument());
+    expect(screen.getByTestId('noise-measure-error')).toHaveTextContent(text);
+    expect(update).not.toHaveBeenCalled();
+  });
+
+  it('predefinições de distorção ligam o portão; as limpas não', async () => {
+    const { STUDIO_PRESETS } = await import('../../src/fx/presets');
+    const gate = (id: string) => STUDIO_PRESETS.find((p) => p.id === id)!.params.gate.enabled;
+    expect(gate('crunch')).toBe(true);
+    expect(gate('lead')).toBe(true);
+    expect(gate('direct')).toBe(false);
+    expect(gate('clean')).toBe(false);
   });
 });

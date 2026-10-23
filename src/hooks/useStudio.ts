@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { listAudioOutputs, watchDeviceChanges } from '../audio/devices';
+import { thresholdFromNoise, type NoiseMeasure } from '../fx/curves';
 import { StudioEngine } from '../fx/engine';
 import { DEFAULT_STUDIO, STUDIO_PRESETS } from '../fx/presets';
 import type { StudioLevels, StudioParams } from '../fx/types';
@@ -36,7 +37,16 @@ export interface StudioApi {
   /** Níveis do último bloco; null sem captura. Chamar a cada quadro apenas por quem exibe medidores. */
   readLevels(): StudioLevels | null;
   readLatency(): BrowserLatency | null;
+  /**
+   * Mede o ruído de fundo da entrada por MEASURE_MS (cordas abafadas) e sugere o limiar do portão. Exige a saída ligada
+   * (só então o sinal chega ao motor). Não altera nenhum parâmetro: quem chama decide aplicar.
+   */
+  measureNoise(): Promise<NoiseMeasure | { ok: false; reason: 'unavailable' }>;
 }
+
+/** Duração da medida de ruído (ms) e intervalo entre leituras. 2 s dão ~60 quadros de 1024 amostras. */
+export const MEASURE_MS = 2000;
+const MEASURE_STEP_MS = 30;
 
 /**
  * Liga o Estúdio (src/fx) à captura. O motor nasce quando a captura inicia e morre quando ela para, é
@@ -188,6 +198,24 @@ export function useStudio(graph: CaptureGraph | null): StudioApi {
     outputError,
     playTestTone: () => engineRef.current?.playTestTone(),
     readLevels: () => engineRef.current?.levels() ?? null,
+    measureNoise: () =>
+      new Promise((resolve) => {
+        const engine = engineRef.current;
+        if (!engine || !outputEnabled) {
+          resolve({ ok: false, reason: 'unavailable' });
+          return;
+        }
+        const frames: number[] = [];
+        const t0 = Date.now();
+        const timer = setInterval(() => {
+          const l = engine.levels();
+          frames.push(l.inputRmsDb);
+          if (Date.now() - t0 >= MEASURE_MS) {
+            clearInterval(timer);
+            resolve(thresholdFromNoise(frames));
+          }
+        }, MEASURE_STEP_MS);
+      }),
     readLatency: () => {
       if (!graph) return null;
       const c = graph.context;

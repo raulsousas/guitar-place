@@ -356,6 +356,8 @@ Approved by the user after an external review (see "PROPOSED REVISION OF STEP B"
 
 **What the PoC covers:** one shared AudioContext; parallel branch from the capture source; output off by default and enabled by an explicit click; master -18 dB; stateless soft limiter (0.98 ceiling); smoothed parameters; equal-gain crossfade per block; drive, EQ, amp (3 neutral voicings), cabinet (2 neutral sizes), delay, reverb (synthetic IR); output-device selection via `setSinkId` when supported; input/output meters; honest latency section; `src/fx` <-> `src/dsp` import boundary test. **What it does not cover:** the gate items in "Required gate" that need real hardware (loopback round-trip latency, CPU/dropouts over time, unplug behaviour, per-browser results) are pending in manual case 21.
 
+**Song-driven auto setup (added at user request):** the user picks a LOCAL audio file; `src/fx/music-analysis.ts` measures spectrum and decay in the browser and `src/fx/auto-config.ts` applies amp/cabinet/drive/reverb automatically (with Undo). Heuristic thresholds, NOT calibrated with real recordings; measures the whole mix, not the guitar; YouTube links are impossible in a browser (documented). Never changes output on/off, master, input channel or trim. Pending real-world check: manual case 22.
+
 **Original status text:** idea registered; nothing here is a promise of results.
 
 **Intent:** turn the site into a real-time electric-guitar processor, similar in purpose to using REAPER with amp simulators and pedals, running entirely in the browser: capture the guitar from the chosen audio interface, process it with a chain of virtual effects and amp/cabinet models, and play the result on a chosen output (for example a headset).

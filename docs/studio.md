@@ -122,6 +122,74 @@ Ainda **não executado**. Anote os resultados na ficha de `docs/manual-validatio
    máximo).
 5. Para medir só o caminho guitarra -> fone, repita com a guitarra no lugar do cabo e compare com o monitoramento direto.
 
+## Ajuste automático por música
+
+Na aba Estúdio, o usuário escolhe um arquivo de áudio **local** (MP3, WAV, OGG, M4A ou FLAC). O app mede o som do trecho
+e **já aplica** os ajustes no amplificador, gabinete, drive e reverb. Há um botão "Desfazer ajuste automático" que
+restaura os parâmetros anteriores.
+
+### O que é e o que não é
+
+* É uma **heurística escolhida à mão**. Os limiares **não foram calibrados com gravações reais** e o resultado **não foi
+  validado com guitarra real**. Os testes só verificam a **direção** das respostas com sinais sintéticos (mais harmônicos
+  agudos -> mais ganho; sinal mais brilhante -> mais agudos; queda lenta -> mais reverb).
+* A medida é da **mistura inteira** (guitarra, baixo, bateria, voz). Não separa a guitarra. Não identifica a música, o
+  equipamento nem o guitarrista. O resultado **não é o timbre do disco**; é um ponto de partida para ajustar de ouvido.
+* O arquivo é decodificado e analisado no navegador. Não é enviado, gravado nem tocado.
+
+### Por que não há link do YouTube
+
+O navegador não tem acesso ao áudio de um vídeo do YouTube (ele é protegido e não há API para isso), e baixar o áudio
+exigiria um servidor e violaria os termos do serviço. Um link isolado dá apenas o título e o canal, o que não informa
+o timbre. Por isso a entrada é um arquivo que o usuário já possui.
+
+### Limites de entrada
+
+| Limite | Valor | Motivo |
+|---|---|---|
+| Tamanho do arquivo | 60 MB | decodificar vira PCM de 32 bits e usa muito mais memória |
+| Trecho analisado | 120 s, a partir de 25% da duração se for mais longo | tempo e memória; evita a introdução |
+| Duração mínima | 5 s | poucas notas para medir |
+| Fração mínima ativa | 10% dos quadros acima de -50 dBFS | arquivo quase todo silêncio é recusado |
+
+### Medidas (`src/fx/music-analysis.ts`, `ANALYSIS_PARAMS`)
+
+| Medida | Como é calculada | Uso |
+|---|---|---|
+| `highMidDb` | 10 log10(energia 2-5 kHz / energia 250-2000 Hz), FFT de 2048 | proxy de saturação (mais harmônicos agudos) |
+| `lowMidDb` | 10 log10(energia 80-250 Hz / energia 250-2000 Hz) | controle de graves |
+| `centroidHz` | centróide espectral entre 80 Hz e 8 kHz | brilho -> agudos e tom do drive |
+| `tFall10S` | mediana do tempo para o envelope cair 10 dB após um pico (até 1,5 s); nulo com menos de 8 picos | reverb; inconclusivo -> reverb desligado |
+| `loudnessSpreadDb` | p95 - p50 do envelope nos quadros ativos | informativa, não usada nas regras |
+
+Quadros mais de 30 dB abaixo do p95 ficam fora da medida do espectro (evita pausas e finais).
+A queda de volume **não distingue reverb de sustentação natural** da guitarra; a interface diz isso.
+
+### Regras (`src/fx/auto-config.ts`, `ANALYSIS_MAP`)
+
+| Constante | Valor | Efeito |
+|---|---|---|
+| `gainFromDb` / `gainToDb` | -24 / -8 dB | `highMidDb` neste intervalo vira o índice de ganho 0..1 |
+| `cleanBelow` / `crunchBelow` | 0,33 / 0,66 | índice abaixo de 0,33: voz Limpo + gabinete 1x12; abaixo de 0,66: Crunch + 4x12; senão Alto ganho + 4x12 |
+| `driveAbove` | 0,85 | o pedal de drive só liga acima disto, como reforço leve |
+| `brightFromHz` / `brightToHz` | 1200 / 3500 Hz | centróide vira brilho 0..1; controla agudos do amp e o tom do drive |
+| `bassFromDb` / `bassToDb` | -10 / 5 dB | `lowMidDb` vira o controle de graves (0,35 a 0,65) |
+| `fallDrySec` / `fallWetSec` | 0,15 / 1,0 s | queda abaixo de 0,15 s: sem reverb; 1,0 s ou mais: mix máximo |
+| `reverbMaxMix` | 0,3 | teto do mix do reverb; abaixo de 0,05 o reverb fica desligado |
+
+O ganho do amplificador é 0,25 + 0,6 x índice. Todos os valores são ajustáveis de ouvido depois.
+
+### O que NÃO é alterado nem estimado
+
+* **Nunca alterados:** saída ligada/desligada, volume geral, canal de entrada, ganho de entrada. A saída continua desligada.
+* **Não estimados:** delay e equalizador (ficam desligados), pois não há medida confiável a partir da mistura.
+* Os controles de mixer dependem da sua guitarra e da sua interface.
+
+### Testes
+
+`tests/unit/auto-config.test.tsx` (FFT, entradas inválidas, direção das medidas com sinais sintéticos, regras e interface
+com decodificação simulada) e o caso E2E "ajuste automático" em `tests/e2e/capture.spec.ts` (envia um WAV gerado, confere
+resultado, limites, saída desligada, desfazer e erro para arquivo que não é áudio).
 ## O que não está implementado
 
 * Reordenar blocos, salvar/carregar predefinições, cadeia personalizada, carregar IRs do usuário.

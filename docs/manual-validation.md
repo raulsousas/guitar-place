@@ -113,3 +113,12 @@ Não há registro por caso, por janela, nem de latência, palm mute, distorção
 6. Pare a captura e inicie de novo. Esperado: a saída recomeça desligada.
 7. Compare com o monitoramento direto da interface (desligando um dos dois para não ouvir duas vezes).
 8. Meça a latência de ida e volta por loopback (procedimento em docs/studio.md) por navegador, taxa e buffer. Esta tabela não está preenchida: não há resultado real registrado.
+
+### Caso 22 - Estúdio: ajuste automático por música
+
+1. Abra a aba Estúdio e escolha um arquivo de uma música que você conhece bem (guitarra limpa, depois uma com distorção forte). Esperado: os controles mudam sozinhos, a lista mostra cada ajuste com o motivo, e a saída continua desligada.
+2. Ligue a saída com fones e toque. Anote se o timbre se aproxima do disco, o que está muito diferente e o que você precisou corrigir de ouvido. Esta é uma heurística não calibrada: espere diferenças.
+3. Compare uma faixa limpa com uma distorcida. Esperado: a distorcida resulta em mais ganho e gabinete 4x12.
+4. Clique em "Desfazer ajuste automático". Esperado: os valores voltam ao que estavam.
+5. Teste um arquivo curto (menos de 5 s), um quase mudo e um que não é áudio. Esperado: mensagem clara, sem travar.
+6. Esta tabela não está preenchida: não há resultado real registrado.

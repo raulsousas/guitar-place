@@ -5,6 +5,8 @@ import { STUDIO_PRESETS } from '../../fx/presets';
 import type { AmpVoicing, CabinetKind, StudioParams } from '../../fx/types';
 import { Panel } from '../Panel';
 import { ShieldIcon, SlidersIcon } from '../icons';
+import { AutoConfigSection } from './AutoConfigSection';
+import type { DecodedAudio } from '../../audio/decode-file';
 import { Knob } from './Knob';
 import { LatencySection, OutputSection } from './OutputSection';
 
@@ -79,7 +81,7 @@ function BlockHeader({
   );
 }
 
-export function StudioPanel({ studio }: { studio: StudioApi }) {
+export function StudioPanel({ studio, decode }: { studio: StudioApi; decode?: (file: File) => Promise<DecodedAudio> }) {
   const [tab, setTab] = useState<SubTab>('effects');
   const { params, update } = studio;
 
@@ -97,6 +99,8 @@ export function StudioPanel({ studio }: { studio: StudioApi }) {
               original, sem efeitos.
             </span>
           </div>
+
+          <AutoConfigSection studio={studio} decode={decode} />
 
           <label className="field-label" htmlFor="studio-preset">
             Predefinição

@@ -20,6 +20,11 @@ export interface StudioApi {
   update(patch: (p: StudioParams) => StudioParams): void;
   presetId: string | null;
   applyPreset(id: string): void;
+  /** Aplica ajustes calculados (ex.: pela análise de uma música). Guarda os anteriores para desfazer. Não altera volume geral, canal nem ganho de entrada. */
+  applyAuto(params: StudioParams): void;
+  /** Desfaz o último ajuste automático. */
+  undoAuto(): void;
+  canUndoAuto: boolean;
   outputEnabled: boolean;
   setOutputEnabled(enabled: boolean): void;
   outputDevices: AudioOutputDevice[];
@@ -43,12 +48,17 @@ export interface StudioApi {
 export function useStudio(graph: CaptureGraph | null): StudioApi {
   const [params, setParams] = useState<StudioParams>(() => structuredClone(DEFAULT_STUDIO));
   const [presetId, setPresetId] = useState<string | null>('direct');
+  const [undoParams, setUndoParams] = useState<StudioParams | null>(null);
   // Guardar o grafo para o qual a saída foi ligada faz a saída "desligar" sozinha quando o grafo muda.
   const [enabledFor, setEnabledFor] = useState<CaptureGraph | null>(null);
   const [outputDevices, setOutputDevices] = useState<AudioOutputDevice[]>([]);
   const [outputDeviceId, setOutputDeviceId] = useState('');
   const [outputError, setOutputError] = useState<string | null>(null);
   const engineRef = useRef<StudioEngine | null>(null);
+  const paramsRef = useRef(params);
+  useEffect(() => {
+    paramsRef.current = params;
+  }, [params]);
 
   const outputEnabled = graph !== null && enabledFor === graph;
   const outputSelectionSupported = useMemo(
@@ -138,6 +148,21 @@ export function useStudio(graph: CaptureGraph | null): StudioApi {
     setPresetId(id);
   }, []);
 
+  const applyAuto = useCallback((next: StudioParams) => {
+    const cur = paramsRef.current;
+    setUndoParams(cur);
+    // Defesa: mesmo que o chamador envie outros valores, estes três nunca mudam por ajuste automático.
+    setParams({ ...structuredClone(next), masterDb: cur.masterDb, inputChannel: cur.inputChannel, inputTrimDb: cur.inputTrimDb });
+    setPresetId(null);
+  }, []);
+
+  const undoAuto = useCallback(() => {
+    if (!undoParams) return;
+    setParams(undoParams);
+    setUndoParams(null);
+    setPresetId(null);
+  }, [undoParams]);
+
   const setOutputEnabled = useCallback(
     (enabled: boolean) => {
       setEnabledFor(enabled ? graph : null);
@@ -151,6 +176,9 @@ export function useStudio(graph: CaptureGraph | null): StudioApi {
     update,
     presetId,
     applyPreset,
+    applyAuto,
+    undoAuto,
+    canUndoAuto: undoParams !== null,
     outputEnabled,
     setOutputEnabled,
     outputDevices,

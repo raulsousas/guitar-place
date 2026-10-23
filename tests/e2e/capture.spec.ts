@@ -359,3 +359,52 @@ test('Estúdio: saída começa desligada, liga por ação explícita, mede o sin
   await expect(sw).toHaveAttribute('aria-checked', 'false');
   expect(errors).toEqual([]);
 });
+function makeWav(seconds: number, sampleRate = 22050): Buffer {
+  const n = seconds * sampleRate;
+  const buf = Buffer.alloc(44 + n * 2);
+  buf.write('RIFF', 0);
+  buf.writeUInt32LE(36 + n * 2, 4);
+  buf.write('WAVEfmt ', 8);
+  buf.writeUInt32LE(16, 16);
+  buf.writeUInt16LE(1, 20);
+  buf.writeUInt16LE(1, 22);
+  buf.writeUInt32LE(sampleRate, 24);
+  buf.writeUInt32LE(sampleRate * 2, 28);
+  buf.writeUInt16LE(2, 32);
+  buf.writeUInt16LE(16, 34);
+  buf.write('data', 36);
+  buf.writeUInt32LE(n * 2, 40);
+  for (let i = 0; i < n; i++) {
+    const t = i / sampleRate;
+    const env = Math.exp(-3 * (t % 1));
+    let s = 0;
+    for (let h = 1; h <= 8; h++) s += Math.sin(2 * Math.PI * 196 * h * t) / h;
+    buf.writeInt16LE(Math.round(Math.max(-1, Math.min(1, s * env * 0.4)) * 32767), 44 + i * 2);
+  }
+  return buf;
+}
+
+test('Estúdio: ajuste automático por arquivo local aplica, informa os limites, não liga a saída e desfaz', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+  await page.goto('/');
+  await page.getByTestId('tab-studio').click();
+  await expect(page.getByTestId('auto-limits')).toHaveCount(0);
+
+  await page.getByTestId('auto-file').setInputFiles({ name: 'teste.wav', mimeType: 'audio/wav', buffer: makeWav(10) });
+  await expect(page.getByTestId('auto-result')).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByTestId('auto-result')).toContainText('teste.wav');
+  await expect(page.getByTestId('auto-limits')).toContainText('Estimativa, não o timbre do disco');
+
+  // Nunca liga a saída por conta própria.
+  await expect(page.getByTestId('studio-output-switch')).toHaveAttribute('aria-checked', 'false');
+
+  await expect(page.getByTestId('auto-undo')).toBeEnabled();
+  await page.getByTestId('auto-undo').click();
+  await expect(page.getByTestId('auto-undo')).toBeDisabled();
+
+  // Arquivo que não é áudio: mensagem clara, sem quebrar.
+  await page.getByTestId('auto-file').setInputFiles({ name: 'x.mp3', mimeType: 'audio/mpeg', buffer: Buffer.from('nao e audio') });
+  await expect(page.getByTestId('auto-error')).toBeVisible({ timeout: 15_000 });
+  expect(errors).toEqual([]);
+});

@@ -197,6 +197,9 @@ detector **não foram alterados** (o detector recebe sempre o sinal original, se
 - Amplificador e gabinete são **aproximações simples** (saturação matemática e filtros), sem nomes nem modelos de
   equipamentos reais. Licenças e origem em `docs/licenses.md`.
 - **Som, latência e qualidade não foram validados com guitarra real** (caso 21 em `docs/manual-validation.md`).
+- **Ajuste automático por música:** escolha um arquivo de áudio local e o Estúdio se configura (amp, gabinete, drive, reverb).
+  É uma heurística não calibrada, mede a mistura inteira (não só a guitarra) e não funciona com links do YouTube.
+  Nunca altera saída, volume geral, canal nem ganho de entrada, e tem botão de desfazer. Ver `docs/studio.md` e caso 22.
 
 ## O que ainda não funciona
 
